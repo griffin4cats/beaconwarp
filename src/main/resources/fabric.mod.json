@@ -1,29 +1,29 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
-  "version": "${version}",
+  "id": "beaconwarp",
+  "version": "0.0.3",
 
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Beacon Warp Mod",
+  "description": "A mod adding balanced fast travel functionality to beacons",
   "authors": [
-    "Me!"
+    "griffin4cats"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://github.com/griffin4cats",
+    "sources": "https://github.com/griffin4cats/beaconwarp"
   },
 
   "license": "CC0-1.0",
-  "icon": "assets/modid/icon.png",
+  "icon": "assets/beaconwarp/icon.png",
 
-  "environment": "*",
+  "environment": "server",
   "entrypoints": {
-    "main": [
-      "net.fabricmc.example.ExampleMod"
+    "server": [
+      "in.gryff.beaconwarp.BeaconWarp"
     ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "beaconwarp.mixins.json"
   ],
 
   "depends": {
