@@ -43,7 +43,7 @@ public abstract class ServerPlayerMixin extends LivingEntity {
                         int j = teleportPos.getY();
                         double k = teleportPos.getZ();
                         teleport(i + .5, j + 1, k + .5);
-                        beaconwarpCooldown = 200;
+                        beaconwarpCooldown = 10;
                     }
                 } else {
                     sendSystemMessage(Text.of("Sorry, you still have a cooldown for another " + beaconwarpCooldown + " ticks!"), getUuid());

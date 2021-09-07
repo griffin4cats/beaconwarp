@@ -32,34 +32,35 @@ public class BeaconWarpManager {
             }
         } else {
             System.out.println("Beacon not already registered. Registering beacon, and checking. ID is " + nextID);
-            System.out.println("Now here's the two lists i guess:");
             beaconMap.put(baseBlockList, nextID);
             //The beacon may have 4-fold symmetry, so we check for that.
-            List<Block> newList = new ArrayList<>(baseBlockList);
-            baseBlockList = rotateBase(baseBlockList);
-            printBase(parseBase(baseBlockList));
-            printBase(parseBase(newList));
-            if (baseBlockList.equals(rotateBase(baseBlockList))) {
+            List<Block> newList = new ArrayList<>(rotateBase(baseBlockList));
+            //System.out.println("Now here's the two lists i guess:");
+            //printBase(parseBase(baseBlockList));
+            //printBase(parseBase(newList));
+            if (newList.equals(baseBlockList)) {
                 System.out.println("Base has 4-fold symmetry, cool!");
             } else {
-                System.out.println("Beacon appears to not have 4-fold symmetry... I hope.");
-                printBase(parseBase(baseBlockList));
-                beaconMap.put(baseBlockList, nextID);
+                System.out.println("Beacon appears to not have 4-fold symmetry... I hope?");
+                beaconMap.put(newList, nextID);
+                printBase(parseBase(newList));
+                newList = rotateBase(newList);
                 //The beacon may have 2-fold symmetry, so we check for that, too
-                if (baseBlockList.equals(rotateBase(baseBlockList))) {
+                if (newList.equals(baseBlockList)) {
                     System.out.println("Base has 2-fold symmetry, neat!");
                 } else{
-                    System.out.println("Beacon appears to not have 2-fold symmetry... I hope.");
-                    printBase(parseBase(baseBlockList));
-                    beaconMap.put(baseBlockList, nextID);
-                    rotateBase(baseBlockList);
-                    printBase(parseBase(baseBlockList));
-                    beaconMap.put(baseBlockList, nextID);
+                    System.out.println("Beacon appears to not have 2-fold symmetry... I hope?");
+                    printBase(parseBase(newList));
+                    beaconMap.put(newList, nextID);
+
+                    newList = rotateBase(newList);
+                    printBase(parseBase(newList));
+                    beaconMap.put(newList, nextID);
                     System.out.println("Okay, that's done... I hope?");
                 }
             }
-            System.out.println("Base successfully registered in beacon map. Now for the channel map");
             nextID += 1;
+            System.out.println("Base successfully registered in beacon map. Now for the channel map.");
         }
         int thisID = beaconMap.get(baseBlockList);
         System.out.println("Channel ID: " + thisID);
@@ -157,19 +158,6 @@ public class BeaconWarpManager {
         return outList;
     }
 
-    public static void printList(List<Block> listIn){
-        int width = (int) Math.sqrt(listIn.size());
-        for (int i = 0; i <= width-1; i++){
-            String outString = "";
-            for (int j = 0; j <= width-1; j++){
-                outString += listIn.get((width*i) + j).getTranslationKey();
-                if (j != width-1)
-                    outString += ", ";
-            }
-            System.out.println(outString);
-        }
-    }
-
     public static BlockPos getBeaconTeleport(BlockPos beaconPos, World world){
         System.out.println("Received information, attempting beacon warp");
         List<Block> baseBlockList = scanBase(beaconPos, world);
@@ -209,6 +197,20 @@ public class BeaconWarpManager {
                 i = beaconLevelLimit;
         }
         return outList;
+    }
+
+    public static void printList(List<Block> listIn){
+        int width = (int) Math.sqrt(listIn.size());
+        for (int i = 0; i <= width-1; i++){
+            String outString = "";
+            for (int j = 0; j <= width-1; j++){
+                String tempString = listIn.get((width*i) + j).toString();
+                outString += tempString.substring(6,tempString.length()-1);
+                if (j != width-1)
+                    outString += ", ";
+            }
+            System.out.println(outString);
+        }
     }
 
     public static void printBase(List<List<Block>> baseList){
@@ -252,4 +254,5 @@ public class BeaconWarpManager {
         System.out.println(" ");
         System.out.println("Full print concluded.");
     }
+
 }
