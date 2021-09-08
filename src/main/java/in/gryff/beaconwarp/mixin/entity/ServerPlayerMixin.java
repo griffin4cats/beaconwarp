@@ -7,8 +7,11 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -23,6 +26,8 @@ public abstract class ServerPlayerMixin extends LivingEntity {
 
     @Shadow public abstract void sendSystemMessage(Text message, UUID sender);
 
+    @Shadow public abstract ServerWorld getServerWorld();
+
     @Inject( method = "tick", at = @At("RETURN"))
     void onTick(CallbackInfo ci) {      //Run this code every tick
         if (beaconwarpCooldown != 0)
@@ -35,14 +40,18 @@ public abstract class ServerPlayerMixin extends LivingEntity {
 
             if(block instanceof BeaconBlock) {
                 if (beaconwarpCooldown == 0) {
-                    BlockPos teleportPos = BeaconWarpManager.getBeaconTeleport(posBelowPlayer, world);
-                    if (teleportPos.equals(posBelowPlayer))
+                    RegistryKey<World> worldKey = world.getRegistryKey();
+                    Pair<BlockPos, RegistryKey<World>> worldPosPair = new Pair<>(posBelowPlayer, worldKey);
+                    Pair<BlockPos, RegistryKey<World>> teleportPosPair = BeaconWarpManager.getBeaconTeleport(posBelowPlayer, world);
+                    if (teleportPosPair.equals(worldPosPair))
                         sendSystemMessage(Text.of("Ope, teleport ain't workin, sorry bud"), getUuid());
                     else {
-                        double i = teleportPos.getX();
-                        int j = teleportPos.getY();
-                        double k = teleportPos.getZ();
-                        teleport(i + .5, j + 1, k + .5);
+                        double i = teleportPosPair.getLeft().getX();
+                        double j = teleportPosPair.getLeft().getY();
+                        double k = teleportPosPair.getLeft().getZ();
+                        ServerWorld teleportWorld = this.getServer().getWorld(teleportPosPair.getRight());
+                        ServerPlayerEntity player = (ServerPlayerEntity)(Object)this;
+                        player.teleport(teleportWorld,i + .5, j + 1, k + .5, this.getYaw(), this.getPitch());
                         beaconwarpCooldown = 10;
                     }
                 } else {
