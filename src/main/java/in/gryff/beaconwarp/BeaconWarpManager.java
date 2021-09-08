@@ -28,9 +28,11 @@ public class BeaconWarpManager {
             for (MinecraftLocation location: destinations){
                 printBlockPos(location);
             }
-            if (destinations.contains(beaconLocation)) {
-                System.out.println("Beacon already in list");
-                return false;
+            for (MinecraftLocation location: destinations){
+                if (location.equals(beaconLocation)) {
+                    System.out.println("Beacon already in list");
+                    return false;
+                }
             }
         } else {
             System.out.println("Beacon not already registered. Registering beacon, and checking. ID is " + nextID);
@@ -169,18 +171,16 @@ public class BeaconWarpManager {
             return beaconLocation;
         }
         List<MinecraftLocation> posList = channelMap.get(beaconMap.get(baseBlockList));
-        if (posList.contains(beaconLocation)){
-            int index = posList.indexOf(beaconLocation);
-            if (index == posList.size()-1){
+        for (int i = 0; i < posList.size(); i++) {
+            MinecraftLocation location = posList.get(i);
+            if (location.equals(beaconLocation)) {
+                System.out.println("Beacon is at index " + i + " of " + posList.size());
                 System.out.println("Teleporting...");
-                return posList.get(0);
+                return posList.get((i + 1) % posList.size());
             }
-            System.out.println("Teleporting...");
-            return posList.get(index+1);
-        } else {
-            System.out.println("This beacon is not actually in the warp list! Cancelling teleport.");
-            return beaconLocation;
         }
+        System.out.println("This beacon is not actually in the warp list! Cancelling teleport.");
+        return beaconLocation;
     }
 
     public static List<List<Block>> parseBase(List<Block> blockList){

@@ -24,4 +24,8 @@ public class MinecraftLocation {
     public String toString(){
         return key.toString() + pos.toString();
     }
+
+    public boolean equals(MinecraftLocation otherLocation){
+        return (otherLocation.toString().equals(this.toString()));
+    }
 }
