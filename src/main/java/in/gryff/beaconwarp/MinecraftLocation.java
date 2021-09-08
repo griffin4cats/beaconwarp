@@ -22,7 +22,7 @@ public class MinecraftLocation {
     }
 
     public String toString(){
-        return key.toString() + pos.toString();
+        return key.getValue().toString() + " at " + pos.toString().substring(8);
     }
 
     public boolean equals(MinecraftLocation otherLocation){

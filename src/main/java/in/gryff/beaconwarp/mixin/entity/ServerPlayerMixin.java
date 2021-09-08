@@ -46,6 +46,15 @@ public abstract class ServerPlayerMixin extends LivingEntity {
                     MinecraftLocation teleportLocation = BeaconWarpManager.getBeaconTeleport(posBelowPlayer, world);
                     if (teleportLocation.equals(worldLocation)) {
                         sendSystemMessage(Text.of("Ope, teleport ain't workin, sorry bud"), getUuid());
+                    } else if (worldKey.toString().equals(teleportLocation.getKey().toString())) {
+                        sendSystemMessage(Text.of("Same dimension teleport"), getUuid());
+                        sendSystemMessage(Text.of("Teleporting player from " + worldLocation + " to " + teleportLocation), getUuid());
+                        System.out.println("Teleporting player from " + worldLocation + " to " + teleportLocation);
+                        double i = teleportLocation.getPos().getX();
+                        double j = teleportLocation.getPos().getY();
+                        double k = teleportLocation.getPos().getZ();
+                        teleport (i + .5, j + 1, k + .5);
+                        beaconwarpCooldown = 20;
                     } else {
                         sendSystemMessage(Text.of("Teleporting player from " + worldLocation + " to " + teleportLocation), getUuid());
                         System.out.println("Teleporting player from " + worldLocation + " to " + teleportLocation);
