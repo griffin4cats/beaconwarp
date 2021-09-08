@@ -1,6 +1,7 @@
 package in.gryff.beaconwarp.mixin.entity;
 
 import in.gryff.beaconwarp.BeaconWarpManager;
+import in.gryff.beaconwarp.MinecraftLocation;
 import net.minecraft.block.BeaconBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -41,15 +42,15 @@ public abstract class ServerPlayerMixin extends LivingEntity {
             if(block instanceof BeaconBlock) {
                 if (beaconwarpCooldown == 0) {
                     RegistryKey<World> worldKey = world.getRegistryKey();
-                    Pair<BlockPos, RegistryKey<World>> worldPosPair = new Pair<>(posBelowPlayer, worldKey);
-                    Pair<BlockPos, RegistryKey<World>> teleportPosPair = BeaconWarpManager.getBeaconTeleport(posBelowPlayer, world);
-                    if (teleportPosPair.equals(worldPosPair))
+                    MinecraftLocation worldLocation = new MinecraftLocation(posBelowPlayer, worldKey);
+                    MinecraftLocation teleportLocation = BeaconWarpManager.getBeaconTeleport(posBelowPlayer, world);
+                    if (teleportLocation.equals(worldLocation))
                         sendSystemMessage(Text.of("Ope, teleport ain't workin, sorry bud"), getUuid());
                     else {
-                        double i = teleportPosPair.getLeft().getX();
-                        double j = teleportPosPair.getLeft().getY();
-                        double k = teleportPosPair.getLeft().getZ();
-                        ServerWorld teleportWorld = this.getServer().getWorld(teleportPosPair.getRight());
+                        double i = teleportLocation.getPos().getX();
+                        double j = teleportLocation.getPos().getY();
+                        double k = teleportLocation.getPos().getZ();
+                        ServerWorld teleportWorld = this.getServer().getWorld(teleportLocation.getKey());
                         ServerPlayerEntity player = (ServerPlayerEntity)(Object)this;
                         player.teleport(teleportWorld,i + .5, j + 1, k + .5, this.getYaw(), this.getPitch());
                         beaconwarpCooldown = 10;
