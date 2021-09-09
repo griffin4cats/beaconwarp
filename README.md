@@ -22,6 +22,19 @@ By adding a cooldown between teleports, it discourages linking huge networks tha
 
 But it *does* encourage infrastructure, in the form of warp hubs. They'll let you link an arbitrary amount of locations together, with only a 10 second travel time between them.
 
+## What's next?
+
+There's a few important things left to do before release.
+
+- [x] Interdimensional travel
+- [ ] Updating beacons
+- [ ] Checking beacon at destination
+- [ ] Warp deletion
+- [ ] Config file
+- [ ] Saving data
+
+These are the essential things left before release, but I also have a number of tweaks and extra features that I might decide to add before I release this.
+
 ## License
 
 This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
