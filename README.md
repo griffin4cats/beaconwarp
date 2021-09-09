@@ -1,8 +1,26 @@
-# Fabric Example Mod
+# Beacon Warp
 
-## Setup
+## Balanced fast travel
 
-For setup instructions please see the [fabric wiki page](https://fabricmc.net/wiki/tutorial:setup) that relates to the IDE that you are using.
+Beacon warp is a server-side that adds fast travel capability to beacons, with a goal of providing an intuitive yet balanced method of fast travel.
+
+To activate a beacon's warp capabilities, right click a beacon with dragon's breath.
+
+The composition and configuration of the base of the beacon determines its channel. In other words, beacons will only link to other beacons that are constructed with an identical base.
+Instead of warp selectors, beacons are linked together in loops, so each beacon of a given base will only teleport you to the next in the chain.
+
+These two ideas combined together makes for a simple but balanced fast travel system.
+
+## Why beacon warp?
+
+Vanilla minecraft has no method of fast travel besides nether highways. However, the infrastructure this requires is enormous.
+
+Warp mods that add commands like /home that instantly let you travel to places are essentially a watered down version of /teleport, and they don't encourage any form of infrastructure in the world.
+
+Beacon warp strikes a balance between these two.
+By adding a cooldown between teleports, it discourages linking huge networks that connect your entire base. If it takes 10 seconds for your teleport cooldown to expire, and you have 7 different places in your base linked with beacons, then it could take up to a minute to reach the destination you want to go to. 
+
+But it *does* encourage infrastructure, in the form of warp hubs. They'll let you link an arbitrary amount of locations together, with only a 10 second travel time between them.
 
 ## License
 
