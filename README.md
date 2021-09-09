@@ -28,6 +28,7 @@ There's a few important things left to do before release.
 
 - [x] Interdimensional travel
 - [ ] Updating beacons
+- [ ] Use custom type for beacon base?
 - [ ] Checking beacon at destination
 - [ ] Warp deletion
 - [ ] Config file
