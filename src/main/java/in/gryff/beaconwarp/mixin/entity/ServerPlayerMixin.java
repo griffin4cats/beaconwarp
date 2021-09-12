@@ -10,7 +10,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
-import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
@@ -44,30 +43,23 @@ public abstract class ServerPlayerMixin extends LivingEntity {
                     RegistryKey<World> worldKey = world.getRegistryKey();
                     MinecraftLocation worldLocation = new MinecraftLocation(posBelowPlayer, worldKey);
                     MinecraftLocation teleportLocation = BeaconWarpManager.getBeaconTeleport(posBelowPlayer, world);
+                    ServerWorld teleportWorld = this.getServer().getWorld(teleportLocation.getKey());
+                    //BeaconWarpManager.updateBeacon(teleportLocation.getPos(),teleportWorld);
                     if (teleportLocation.equals(worldLocation)) {
-                        sendSystemMessage(Text.of("Ope, teleport ain't workin, sorry bud"), getUuid());
-                    } else if (worldKey.toString().equals(teleportLocation.getKey().toString())) {
-                        sendSystemMessage(Text.of("Same dimension teleport"), getUuid());
-                        sendSystemMessage(Text.of("Teleporting player from " + worldLocation + " to " + teleportLocation), getUuid());
-                        System.out.println("Teleporting player from " + worldLocation + " to " + teleportLocation);
-                        double i = teleportLocation.getPos().getX();
-                        double j = teleportLocation.getPos().getY();
-                        double k = teleportLocation.getPos().getZ();
-                        teleport (i + .5, j + 1, k + .5);
-                        beaconwarpCooldown = 20;
+                        sendSystemMessage(Text.of("Ope, teleport ain't working, sorry bud"), getUuid());
                     } else {
                         sendSystemMessage(Text.of("Teleporting player from " + worldLocation + " to " + teleportLocation), getUuid());
                         System.out.println("Teleporting player from " + worldLocation + " to " + teleportLocation);
                         double i = teleportLocation.getPos().getX();
                         double j = teleportLocation.getPos().getY();
                         double k = teleportLocation.getPos().getZ();
-                        ServerWorld teleportWorld = this.getServer().getWorld(teleportLocation.getKey());
-                        ServerPlayerEntity player = (ServerPlayerEntity)(Object)this;
+                        ServerPlayerEntity player = (ServerPlayerEntity)(Object)this; //this is so cursed. i hate it.
                         player.teleport(teleportWorld,i + .5, j + 1, k + .5, this.getYaw(), this.getPitch());
-                        beaconwarpCooldown = 20;
                     }
+                    beaconwarpCooldown = 20;
                 } else {
-                    sendSystemMessage(Text.of("Sorry, you still have a cooldown for another " + beaconwarpCooldown + " ticks!"), getUuid());
+                    if ((beaconwarpCooldown % 5) == 0)
+                        sendSystemMessage(Text.of("Sorry, you still have a cooldown for another " + beaconwarpCooldown + " ticks!"), getUuid());
                 }
             }
         }

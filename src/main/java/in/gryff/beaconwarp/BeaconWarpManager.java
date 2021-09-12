@@ -3,23 +3,25 @@ package in.gryff.beaconwarp;
 import net.minecraft.block.Block;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class BeaconWarpManager {
-    static int nextID = 0;
+    static int nextID = 1;
     static Map<List<Block>, Integer> beaconMap = new HashMap<>();
     static Map<Integer, List<MinecraftLocation>> channelMap = new HashMap<>();
+    static Map<MinecraftLocation, Integer> blockMap = new HashMap<>(); //In the future this could be replaced with storing NBT data in the beacon
 
-    public static boolean registerBeacon(BlockPos beaconPos, World world){
-        MinecraftLocation beaconLocation = new MinecraftLocation(beaconPos, world.getRegistryKey());
+    public static boolean registerBeacon(BlockPos pos, World world){
+        List<Block> baseBlockList = scanBase(pos, world);
+        return registerWithScan(baseBlockList, pos, world);
+    }
+
+    public static boolean registerWithScan(List<Block> baseBlockList, BlockPos pos, World world){
+        //This register system will ASSUME that there is NO ENTRY for the beacon location in blockMap or channelMap.
+        MinecraftLocation beaconLocation = new MinecraftLocation(pos, world.getRegistryKey());
         System.out.println("--- Attempting to register beacon ---");
-        List<Block> baseBlockList = scanBase(beaconPos, world);
         System.out.println("Here's the new list! ");
         printBase(parseBase(baseBlockList));
         if (!(beaconMap.get(baseBlockList) == null)){
@@ -39,9 +41,6 @@ public class BeaconWarpManager {
             beaconMap.put(baseBlockList, nextID);
             //The beacon may have 4-fold symmetry, so we check for that.
             List<Block> newList = new ArrayList<>(rotateBase(baseBlockList));
-            //System.out.println("Now here's the two lists i guess:");
-            //printBase(parseBase(baseBlockList));
-            //printBase(parseBase(newList));
             if (newList.equals(baseBlockList)) {
                 System.out.println("Base has 4-fold symmetry, cool!");
             } else {
@@ -56,7 +55,6 @@ public class BeaconWarpManager {
                     System.out.println("Beacon appears to not have 2-fold symmetry... I hope?");
                     printBase(parseBase(newList));
                     beaconMap.put(newList, nextID);
-
                     newList = rotateBase(newList);
                     printBase(parseBase(newList));
                     beaconMap.put(newList, nextID);
@@ -67,6 +65,7 @@ public class BeaconWarpManager {
             System.out.println("Base successfully registered in beacon map. Now for the channel map.");
         }
         int thisID = beaconMap.get(baseBlockList);
+        blockMap.put(beaconLocation, thisID);
         System.out.println("Channel ID: " + thisID);
         if (!channelMap.containsKey(thisID)) {
             System.out.println("Channel ID does not exist, opening channel with blank list.");
@@ -85,9 +84,8 @@ public class BeaconWarpManager {
 
     public static List<Block> scanBase(BlockPos pos, World world){
         System.out.println("Scanning base...");
-        //Returns a list of all the valid blocks in the beacon base.
-        List<Block> blockList = new ArrayList();
-        List<Block> tempList = new ArrayList();
+        List<Block> blockList = new ArrayList<>();
+        List<Block> tempList = new ArrayList<>();
         int i = pos.getX();
         int j = pos.getY();
         int k = pos.getZ();
@@ -98,6 +96,7 @@ public class BeaconWarpManager {
                     if (!world.getBlockState(new BlockPos(i+m, j-l, k+n)).isIn(BlockTags.BEACON_BASE_BLOCKS)) {
                         tempList.clear();
                         System.out.println("Base finished scanning");
+                        printBase(parseBase(blockList));
                         return blockList;
                     }
                     Block currentBlock = world.getBlockState(new BlockPos(i+m, j-l, k+n)).getBlock();
@@ -131,8 +130,7 @@ public class BeaconWarpManager {
     public static List<Block> rotateList(List<Block> inputList){
         //System.out.println("List being rotated. List size: " + inputList.size());
         int width = (int) Math.sqrt(inputList.size());
-        List<Block> newList = new ArrayList<>();
-        newList.addAll(inputList);
+        List<Block> newList = new ArrayList<>(inputList);
         //Transpose the list, flipping the square over the diagonal axis
         for (int i = 0; i <= width-1; i++){
             for (int j = i+1; j <= width-1; j++){
@@ -141,12 +139,13 @@ public class BeaconWarpManager {
                 newList.set((width*j) + i, tempBlock);
             }
         }
-        //Flip sublists, flipping the square over the vertical axis
+        //Flip sub-lists, flipping the square over the vertical axis
         for (int i = 0; i <= width-1; i++){
             for (int j = 0; j <= ((width-1)/2)-1; j++){
                 Block tempBlock = newList.get((width*i) + j);
-                newList.set((width*i) + j, newList.get((width*i) + (width - j - 1)));
-                newList.set((width*i) + (width - j - 1), tempBlock);
+                int second = (width*i) + (width - j - 1);
+                newList.set((width*i) + j, newList.get(second));
+                newList.set(second, tempBlock);
             }
         }
         //System.out.println("List done being rotated. List size: " + inputList.size());
@@ -165,7 +164,7 @@ public class BeaconWarpManager {
     public static MinecraftLocation getBeaconTeleport(BlockPos pos, World world){
         MinecraftLocation beaconLocation = new MinecraftLocation(pos, world.getRegistryKey());
         System.out.println("Received information, attempting beacon warp");
-        List<Block> baseBlockList = scanBase(pos, world);
+        List<Block> baseBlockList = updateBeacon(pos, world);
         if (!beaconMap.containsKey(baseBlockList)) {
             System.out.println("Cannot teleport, block list not found!");
             return beaconLocation;
@@ -181,6 +180,48 @@ public class BeaconWarpManager {
         }
         System.out.println("This beacon is not actually in the warp list! Cancelling teleport.");
         return beaconLocation;
+    }
+
+    public static List<Block> updateBeacon(BlockPos pos, World world) {
+        MinecraftLocation beaconLocation = new MinecraftLocation(pos, world.getRegistryKey());
+        List<Block> baseScan = scanBase(pos, world);
+        Integer baseID = beaconMap.get(baseScan); //Integers can be null, ints will just be zero.
+        Integer blockID = blockMap.get(beaconLocation);
+        for (Map.Entry<MinecraftLocation, Integer> entry : blockMap.entrySet()) {
+            if (entry.getKey().equals(beaconLocation)) {
+                blockID = entry.getValue();
+                break;
+            }
+        }
+        if (blockID == null) {
+            if (baseID != null) {
+                System.out.println("given blockID was null... why... Okay, let's check if it's in the system at all.");
+                System.out.println("So, here's our location: " + beaconLocation);
+                for (Map.Entry<MinecraftLocation, Integer> entry : blockMap.entrySet()) {
+                    System.out.println(entry.getKey());
+                    if (entry.getKey().equals(beaconLocation)) {
+                        System.out.println("Well shit, it's in the list... This means there's something wrong. VERY VERY WRONG.");
+                    }
+                }
+            } else {
+                System.out.println("Both baseID and blockID are null. THIS IS NOT A WARP BEACON.");
+            }
+        } else if (baseID == null) {
+            System.out.println("baseID is null, we need to register this beacon again");
+            removeBeacon(beaconLocation, blockID);
+            if (registerWithScan(baseScan, pos, world))
+                System.out.println("UPDATE SUCCESSFUL!");
+        } else if (baseID.equals(blockID)){
+            //Beacon doesn't need to be updated
+            System.out.println("This beacon doesn't need to be updated.");
+        } else {
+            System.out.println("baseID and blockID are not equal! this beacon must be updated!");
+            System.out.println("baseID: " + baseID + ", blockID: " + blockID);
+            removeBeacon(beaconLocation, blockID);
+            if (registerWithScan(baseScan, pos, world))
+                System.out.println("UPDATE SUCCESSFUL!");
+        }
+        return baseScan;
     }
 
     public static List<List<Block>> parseBase(List<Block> blockList){
@@ -205,30 +246,29 @@ public class BeaconWarpManager {
     public static void printList(List<Block> listIn){
         int width = (int) Math.sqrt(listIn.size());
         for (int i = 0; i <= width-1; i++){
-            String outString = "";
+            StringBuilder outString = new StringBuilder();
             for (int j = 0; j <= width-1; j++){
                 String tempString = listIn.get((width*i) + j).toString();
-                outString += tempString.substring(6,tempString.length()-1);
+                outString.append(tempString, 6, tempString.length() - 1);
                 if (j != width-1)
-                    outString += ", ";
+                    outString.append(", ");
             }
             System.out.println(outString);
         }
     }
 
     public static void printBase(List<List<Block>> baseList){
-        System.out.println("Beacon base:");
         for (List<Block> layer : baseList){
             printList(layer);
         }
     }
 
     public static void printBlockPos(MinecraftLocation location){
-        System.out.println(location);
+        System.out.println(location.toString());
     }
 
     public static void printFullMap(){
-        System.out.println("A full map print has been called. This may take time.");
+        System.out.println("A full map print has been called.");
         System.out.println(" ");
         System.out.println(" ");
         for (Map.Entry<List<Block>, Integer> entry : beaconMap.entrySet()){
@@ -252,7 +292,35 @@ public class BeaconWarpManager {
         System.out.println("---------------------------------------");
         System.out.println(" ");
         System.out.println(" ");
+        System.out.println("Now for the block map");
+        System.out.println(" ");
+        System.out.println(" ");
+        for (Map.Entry<MinecraftLocation, Integer> entry : blockMap.entrySet()){
+            System.out.println("MinecraftLocation " + entry.getKey() + " corresponds to " + entry.getValue());
+        }
+        System.out.println("---------------------------------------");
+        System.out.println(" ");
+        System.out.println(" ");
         System.out.println("Full print concluded.");
     }
 
+    public static void removeBeacon(MinecraftLocation beaconLocation, int channelID){
+        List<MinecraftLocation> listInChannel = channelMap.get(channelID);
+        List<MinecraftLocation> newList = new ArrayList<>();
+        for (MinecraftLocation thisLocation : listInChannel){
+            if (!thisLocation.equals(beaconLocation))
+                newList.add(thisLocation);
+        }
+        channelMap.remove(channelID);
+        channelMap.put(channelID,newList);
+        System.out.println("Beacon successfully removed from channelMap");
+        Map<MinecraftLocation, Integer> blockMapCopy = new HashMap<>();
+        for (Map.Entry<MinecraftLocation, Integer> entry : blockMap.entrySet()) {
+            if (!(entry.getKey().equals(beaconLocation))) {
+                blockMapCopy.put(entry.getKey(),entry.getValue());
+            }
+        }
+        blockMap = blockMapCopy;
+        System.out.println("Beacon successfully removed from blockMap");
+    }
 }
