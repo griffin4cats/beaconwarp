@@ -161,10 +161,9 @@ public class BeaconWarpManager {
         return outList;
     }
 
-    public static MinecraftLocation getBeaconTeleport(BlockPos pos, World world){
+    public static MinecraftLocation getBeaconTeleport(BlockPos pos, World world, List<Block> baseBlockList){
         MinecraftLocation beaconLocation = new MinecraftLocation(pos, world.getRegistryKey());
         System.out.println("Received information, attempting beacon warp");
-        List<Block> baseBlockList = updateBeacon(pos, world);
         if (!beaconMap.containsKey(baseBlockList)) {
             System.out.println("Cannot teleport, block list not found!");
             return beaconLocation;
@@ -174,7 +173,7 @@ public class BeaconWarpManager {
             MinecraftLocation location = posList.get(i);
             if (location.equals(beaconLocation)) {
                 System.out.println("Beacon is at index " + i + " of " + posList.size());
-                System.out.println("Teleporting...");
+                System.out.println("Returning teleport location...");
                 return posList.get((i + 1) % posList.size());
             }
         }

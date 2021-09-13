@@ -19,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.List;
 import java.util.UUID;
 
 @Mixin(ServerPlayerEntity.class)
@@ -42,19 +43,33 @@ public abstract class ServerPlayerMixin extends LivingEntity {
                 if (beaconwarpCooldown == 0) {
                     RegistryKey<World> worldKey = world.getRegistryKey();
                     MinecraftLocation worldLocation = new MinecraftLocation(posBelowPlayer, worldKey);
-                    MinecraftLocation teleportLocation = BeaconWarpManager.getBeaconTeleport(posBelowPlayer, world);
-                    ServerWorld teleportWorld = this.getServer().getWorld(teleportLocation.getKey());
-                    //BeaconWarpManager.updateBeacon(teleportLocation.getPos(),teleportWorld);
+                    List<Block> baseScan = BeaconWarpManager.updateBeacon(posBelowPlayer, world);
+                    MinecraftLocation teleportLocation = BeaconWarpManager.getBeaconTeleport(posBelowPlayer, world, baseScan);
+                    MinecraftLocation nextTeleportLocation;
+                    ServerWorld teleportWorld;
+
+                    //We are going to update the beacon we're teleporting to. After we update it, it may have a different channel.
+                    //So, we make a copy of the location, update the beacon, check if the teleport location has changed, and if it has, we repeat. We repeat until the location stays the same.
+
+                    teleportWorld = this.getServer().getWorld(teleportLocation.getKey());
+                    BeaconWarpManager.updateBeacon(teleportLocation.getPos(),teleportWorld);
+                    nextTeleportLocation = BeaconWarpManager.getBeaconTeleport(posBelowPlayer, world, baseScan);
+                    while (!(nextTeleportLocation.equals(teleportLocation))){
+                        teleportLocation = new MinecraftLocation(nextTeleportLocation);
+                        teleportWorld = this.getServer().getWorld(teleportLocation.getKey());
+                        BeaconWarpManager.updateBeacon(teleportLocation.getPos(),teleportWorld);
+                        nextTeleportLocation = BeaconWarpManager.getBeaconTeleport(posBelowPlayer, world, baseScan);
+                    }
                     if (teleportLocation.equals(worldLocation)) {
                         sendSystemMessage(Text.of("Ope, teleport ain't working, sorry bud"), getUuid());
                     } else {
                         sendSystemMessage(Text.of("Teleporting player from " + worldLocation + " to " + teleportLocation), getUuid());
                         System.out.println("Teleporting player from " + worldLocation + " to " + teleportLocation);
-                        double i = teleportLocation.getPos().getX();
-                        double j = teleportLocation.getPos().getY();
-                        double k = teleportLocation.getPos().getZ();
+                        double x = teleportLocation.getPos().getX()-worldLocation.getPos().getX();
+                        double y = teleportLocation.getPos().getY()-worldLocation.getPos().getY();
+                        double z = teleportLocation.getPos().getZ()-worldLocation.getPos().getZ();
                         ServerPlayerEntity player = (ServerPlayerEntity)(Object)this; //this is so cursed. i hate it.
-                        player.teleport(teleportWorld,i + .5, j + 1, k + .5, this.getYaw(), this.getPitch());
+                        player.teleport(teleportWorld,getX() + x, getY() + y, getZ() + z, this.getYaw(), this.getPitch());
                     }
                     beaconwarpCooldown = 20;
                 } else {

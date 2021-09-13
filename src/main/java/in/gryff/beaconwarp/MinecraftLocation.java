@@ -13,6 +13,11 @@ public class MinecraftLocation {
         key = keyIn;
     }
 
+    public MinecraftLocation(MinecraftLocation location){
+        pos = location.getPos();
+        key = location.getKey();
+    }
+
     public RegistryKey<World> getKey(){
         return key;
     }
@@ -22,7 +27,7 @@ public class MinecraftLocation {
     }
 
     public String toString(){
-        return key.getValue().toString() + " at " + pos.toString().substring(8);
+        return pos.toString().substring(8) + " in " + key.getValue().toString();
     }
 
     public boolean equals(MinecraftLocation otherLocation){
