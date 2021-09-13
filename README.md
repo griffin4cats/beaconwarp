@@ -28,7 +28,7 @@ There's a few important things left to do before release.
 
 - [x] Interdimensional travel
 - [x] Updating beacons
-- [ ] Checking beacon at destination
+- [x] Checking beacon at destination
 - [ ] Warp deletion
 - [ ] Config file
 - [ ] Saving data
