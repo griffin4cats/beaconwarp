@@ -51,6 +51,10 @@ public class BeaconBlockMixin {
             }
         }
     }
+
+    public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+        BeaconWarpManager.removeBeaconWithLocation(pos, world);
+    }
 }
 
 
