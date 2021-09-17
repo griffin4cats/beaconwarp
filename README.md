@@ -28,13 +28,18 @@ There's a few important things left to do before release.
 
 - [x] Interdimensional travel
 - [x] Updating beacons
-- [ ] Checking beacon at destination
+- [x] Checking beacon at destination
 - [ ] Warp deletion
 - [ ] Config file
 - [ ] Saving data
+- [ ] Big code cleanup
 
 These are the essential things left before release, but I also have a number of tweaks and extra features that I might decide to add before I release this.
 
 ## License
 
 This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
+
+Partially inspired by Maxypoo's [Warp shrines](https://www.planetminecraft.com/data-pack/warp-shrines-teleport-between-locations/).
+
+Also, check out GatKong's [TeleBeacon datapack](https://www.planetminecraft.com/data-pack/telebeacon/)!
