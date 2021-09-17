@@ -19,7 +19,8 @@ public class BeaconWarpManager {
     }
 
     public static boolean registerWithScan(List<Block> baseBlockList, BlockPos pos, World world) {
-
+        if (baseBlockList.size() == 0)
+            return false;
         //This register system will ASSUME that there is NO ENTRY for the beacon location in blockMap or channelMap.
         MinecraftLocation beaconLocation = new MinecraftLocation(pos, world.getRegistryKey());
         System.out.println("--- Attempting to register beacon ---");
