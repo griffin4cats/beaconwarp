@@ -80,7 +80,8 @@ public class BeaconWarpManager {
         channelMap.remove(thisID);
         channelMap.put(thisID, thisList);
         System.out.println("If all went well, this beacon should be registered.");
-        printFullMap();
+        System.out.println("--- Registry complete ---");
+        //printFullMap();
         return true;
     }
 
@@ -273,6 +274,18 @@ public class BeaconWarpManager {
         if (beaconID == 0)
             System.out.println("Oh no");
         removeBeacon(beaconLocation, beaconID);
+    }
+
+    public static boolean isWarpBeacon(BlockPos pos, World world){
+        MinecraftLocation beaconLocation = new MinecraftLocation(pos, world.getRegistryKey());
+        Integer beaconID = null;
+        for (Map.Entry<MinecraftLocation, Integer> entry : blockMap.entrySet()) {
+            if (entry.getKey().equals(beaconLocation)) {
+                beaconID = entry.getValue();
+            }
+        }
+        System.out.println("Is " + beaconLocation + " a warp beacon? " + (beaconID != null));
+        return beaconID != null;
     }
 
     public static List<List<Block>> parseBase(List<Block> blockList) {
