@@ -24,8 +24,7 @@ public class BeaconWarpManager {
         //This register system will ASSUME that there is NO ENTRY for the beacon location in blockMap or channelMap.
         MinecraftLocation beaconLocation = new MinecraftLocation(pos, world.getRegistryKey());
         System.out.println("--- Attempting to register beacon ---");
-        System.out.println("Here's the new list! ");
-        printBase(parseBase(baseBlockList));
+        //printBase(parseBase(baseBlockList));
         if (!(beaconMap.get(baseBlockList) == null)) {
             System.out.println("Beacon base already exists in list. Here's a list of all beacon block positions in that list:");
             List<MinecraftLocation> destinations = channelMap.get(beaconMap.get(baseBlockList));
@@ -44,17 +43,17 @@ public class BeaconWarpManager {
             //The beacon may have 4-fold symmetry, so we check for that.
             List<Block> newList = new ArrayList<>(rotateBase(baseBlockList));
             if (newList.equals(baseBlockList)) {
-                System.out.println("Base has 4-fold symmetry, cool!");
+                //System.out.println("Base has 4-fold symmetry, cool!");
             } else {
-                System.out.println("Beacon appears to not have 4-fold symmetry... I hope?");
+                //System.out.println("Beacon appears to not have 4-fold symmetry... I hope?");
                 beaconMap.put(newList, nextID);
                 printBase(parseBase(newList));
                 newList = rotateBase(newList);
                 //The beacon may have 2-fold symmetry, so we check for that, too
                 if (newList.equals(baseBlockList)) {
-                    System.out.println("Base has 2-fold symmetry, neat!");
+                    //System.out.println("Base has 2-fold symmetry, neat!");
                 } else {
-                    System.out.println("Beacon appears to not have 2-fold symmetry... I hope?");
+                    //System.out.println("Beacon appears to not have 2-fold symmetry... I hope?");
                     printBase(parseBase(newList));
                     beaconMap.put(newList, nextID);
                     newList = rotateBase(newList);
@@ -68,18 +67,18 @@ public class BeaconWarpManager {
         }
         int thisID = beaconMap.get(baseBlockList);
         blockMap.put(beaconLocation, thisID);
-        System.out.println("Channel ID: " + thisID);
+        //System.out.println("Channel ID: " + thisID);
         if (!channelMap.containsKey(thisID)) {
             System.out.println("Channel ID does not exist, opening channel with blank list.");
             List<MinecraftLocation> newList = new ArrayList<>();
             channelMap.put(thisID, newList);
         }
-        System.out.println("Adding to channel map");
+        //System.out.println("Adding to channel map");
         List<MinecraftLocation> thisList = channelMap.get(thisID);
         thisList.add(beaconLocation);
         channelMap.remove(thisID);
         channelMap.put(thisID, thisList);
-        System.out.println("If all went well, this beacon should be registered.");
+        //System.out.println("If all went well, this beacon should be registered.");
         System.out.println("--- Registry complete ---");
         //printFullMap();
         return true;
@@ -99,9 +98,8 @@ public class BeaconWarpManager {
                     if (!world.getBlockState(new BlockPos(i + m, j - l, k + n)).isIn(BlockTags.BEACON_BASE_BLOCKS)) {
                         tempList.clear();
                         System.out.println("Base finished scanning");
-                        printBase(parseBase(blockList));
-                        System.out.println("This beacon found an invalid block, so it's done scanning.");
-                        System.out.println("Length of list being returned: " + blockList.size());
+                        //printBase(parseBase(blockList));
+                        //System.out.println("This beacon found an invalid block, so it's done scanning.");
                         return blockList;
                     }
                     Block currentBlock = world.getBlockState(new BlockPos(i + m, j - l, k + n)).getBlock();

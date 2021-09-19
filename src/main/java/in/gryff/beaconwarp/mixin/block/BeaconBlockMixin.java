@@ -27,11 +27,11 @@ public class BeaconBlockMixin {
             cancellable=true)
     public void onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit, CallbackInfoReturnable<ActionResult> ci) {
         if (!world.isClient) {
-            player.sendSystemMessage(Text.of("Right clicked a beacon"),player.getUuid());
+            //player.sendSystemMessage(Text.of("Right clicked a beacon"),player.getUuid());
             ItemStack held = player.getStackInHand(hand);
             if (held.getItem() == Items.DRAGON_BREATH) {
-                System.out.println("Dragon's breath used");
-                player.sendSystemMessage(Text.of("You used a dragon's breath on a beacon"), player.getUuid());
+                //System.out.println("Dragon's breath used");
+                //player.sendSystemMessage(Text.of("You used a dragon's breath on a beacon"), player.getUuid());
                 if (BeaconWarpManager.checkValid(pos, world)) {
                     if (BeaconWarpManager.registerBeacon(pos, world)) {
                         System.out.println("Beacon successfully registered");
@@ -46,7 +46,7 @@ public class BeaconBlockMixin {
                         player.sendSystemMessage(Text.of("Failed to register beacon, error unknown"), player.getUuid());
                     }
                 } else {
-                    player.sendSystemMessage(Text.of("This beacon isn't valid"), player.getUuid());
+                    //player.sendSystemMessage(Text.of("This beacon isn't valid"), player.getUuid());
                 }
             }
         }
