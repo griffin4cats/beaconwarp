@@ -26,7 +26,7 @@ public class BeaconBlockMixin {
     @Inject(at=@At("HEAD"), method="onUse(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;Lnet/minecraft/util/hit/BlockHitResult;)Lnet/minecraft/util/ActionResult;",
             cancellable=true)
     public void onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit, CallbackInfoReturnable<ActionResult> ci) {
-        if (!world.isClient) {
+        //if (!world.isClient) {
             //player.sendSystemMessage(Text.of("Right clicked a beacon"),player.getUuid());
             ItemStack held = player.getStackInHand(hand);
             if (held.getItem() == Items.DRAGON_BREATH) {
@@ -49,7 +49,7 @@ public class BeaconBlockMixin {
                     //player.sendSystemMessage(Text.of("This beacon isn't valid"), player.getUuid());
                 }
             }
-        }
+        //}
     }
 
     public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
