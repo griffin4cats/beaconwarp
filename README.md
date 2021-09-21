@@ -29,10 +29,11 @@ There's a few important things left to do before release.
 - [x] Interdimensional travel
 - [x] Updating beacons
 - [x] Checking beacon at destination
-- [ ] Warp deletion
+- [x] Warp deletion
+- [ ] Making singleplayer compatibility
 - [ ] Config file
 - [ ] Saving data
-- [ ] Big code cleanup
+- [ ] Big code cleanup/optimization
 
 These are the essential things left before release, but I also have a number of tweaks and extra features that I might decide to add before I release this.
 
