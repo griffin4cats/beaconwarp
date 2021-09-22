@@ -5,7 +5,8 @@
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "entity.ServerPlayerMixin",
-    "block.BeaconBlockMixin"
+    "block.BeaconBlockMixin",
+    "block.BlockMixin"
   ],
   "client": [
   ],

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "beaconwarp",
-  "version": "0.4.2",
+  "version": "0.5.0",
 
   "name": "Beacon Warp Mod",
   "description": "A mod adding balanced fast travel functionality to beacons",
@@ -16,7 +16,7 @@
   "license": "CC0-1.0",
   "icon": "assets/beaconwarp/icon.png",
 
-  "environment": "server",
+  "environment": "*",
   "entrypoints": {
     "server": [
       "in.gryff.beaconwarp.BeaconWarp"

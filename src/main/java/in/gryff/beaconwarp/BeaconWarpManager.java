@@ -47,17 +47,17 @@ public class BeaconWarpManager {
             } else {
                 //System.out.println("Beacon appears to not have 4-fold symmetry... I hope?");
                 beaconMap.put(newList, nextID);
-                printBase(parseBase(newList));
+                //printBase(parseBase(newList));
                 newList = rotateBase(newList);
                 //The beacon may have 2-fold symmetry, so we check for that, too
                 if (newList.equals(baseBlockList)) {
                     //System.out.println("Base has 2-fold symmetry, neat!");
                 } else {
                     //System.out.println("Beacon appears to not have 2-fold symmetry... I hope?");
-                    printBase(parseBase(newList));
+                    //printBase(parseBase(newList));
                     beaconMap.put(newList, nextID);
                     newList = rotateBase(newList);
-                    printBase(parseBase(newList));
+                    //printBase(parseBase(newList));
                     beaconMap.put(newList, nextID);
                     System.out.println("Okay, that's done... I hope?");
                 }
@@ -67,6 +67,7 @@ public class BeaconWarpManager {
         }
         int thisID = beaconMap.get(baseBlockList);
         blockMap.put(beaconLocation, thisID);
+        System.out.println(beaconLocation);
         //System.out.println("Channel ID: " + thisID);
         if (!channelMap.containsKey(thisID)) {
             System.out.println("Channel ID does not exist, opening channel with blank list.");
@@ -203,7 +204,8 @@ public class BeaconWarpManager {
                     System.out.println("given blockID was null... why... Okay, let's check if it's in the system at all.");
                     System.out.println("So, here's our location: " + beaconLocation);
                     for (Map.Entry<MinecraftLocation, Integer> entry : blockMap.entrySet()) {
-                        System.out.println(entry.getKey());
+                        MinecraftLocation entryLocation = entry.getKey();
+                        System.out.println(entryLocation);
                         if (entry.getKey().equals(beaconLocation)) {
                             System.out.println("Well shit, it's in the list... This means there's something wrong. VERY VERY WRONG.");
                         }
@@ -283,6 +285,8 @@ public class BeaconWarpManager {
             }
         }
         System.out.println("Is " + beaconLocation + " a warp beacon? " + (beaconID != null));
+        if (beaconID != null)
+            System.out.println("And the blockMap value is " + beaconID);
         return beaconID != null;
     }
 
