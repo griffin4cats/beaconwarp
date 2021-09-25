@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "beaconwarp",
-  "version": "0.5.0",
+  "version": "0.6.0",
 
   "name": "Beacon Warp Mod",
   "description": "A mod adding balanced fast travel functionality to beacons",

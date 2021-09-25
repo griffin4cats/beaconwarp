@@ -41,9 +41,10 @@ public abstract class ServerPlayerMixin extends LivingEntity {
 
             if(block instanceof BeaconBlock) {
                 if (beaconwarpCooldown == 0) {
+                    BeaconWarpManager manager = BeaconWarpManager.get((ServerWorld) world);
                     RegistryKey<World> worldKey = world.getRegistryKey();
                     MinecraftLocation worldLocation = new MinecraftLocation(posBelowPlayer, worldKey);
-                    List<Block> baseScan = BeaconWarpManager.updateBeacon(posBelowPlayer, world);
+                    List<Block> baseScan = manager.updateBeacon(posBelowPlayer, world);
                     MinecraftLocation teleportLocation = BeaconWarpManager.getBeaconTeleport(posBelowPlayer, world, baseScan);
                     MinecraftLocation nextTeleportLocation;
                     ServerWorld teleportWorld;
@@ -52,12 +53,12 @@ public abstract class ServerPlayerMixin extends LivingEntity {
                     //So, we make a copy of the location, update the beacon, check if the teleport location has changed, and if it has, we repeat. We repeat until the location stays the same.
 
                     teleportWorld = this.getServer().getWorld(teleportLocation.getKey());
-                    BeaconWarpManager.updateBeacon(teleportLocation.getPos(),teleportWorld);
+                    manager.updateBeacon(teleportLocation.getPos(),teleportWorld);
                     nextTeleportLocation = BeaconWarpManager.getBeaconTeleport(posBelowPlayer, world, baseScan);
                     while (!(nextTeleportLocation.equals(teleportLocation))){
                         teleportLocation = new MinecraftLocation(nextTeleportLocation);
                         teleportWorld = this.getServer().getWorld(teleportLocation.getKey());
-                        BeaconWarpManager.updateBeacon(teleportLocation.getPos(),teleportWorld);
+                        manager.updateBeacon(teleportLocation.getPos(),teleportWorld);
                         nextTeleportLocation = BeaconWarpManager.getBeaconTeleport(posBelowPlayer, world, baseScan);
                     }
                     if (teleportLocation.equals(worldLocation)) {

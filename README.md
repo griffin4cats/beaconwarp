@@ -31,7 +31,7 @@ There's a few important things left to do before release.
 - [x] Checking beacon at destination
 - [x] Warp deletion
 - [x] Making singleplayer compatibility
-- [ ] Saving data
+- [x] Saving data
 - [ ] Config file
 - [ ] Big code cleanup/optimization
 

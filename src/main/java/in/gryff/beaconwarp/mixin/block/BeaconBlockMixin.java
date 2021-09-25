@@ -2,6 +2,7 @@ package in.gryff.beaconwarp.mixin.block;
 
 import in.gryff.beaconwarp.BeaconWarpManager;
 import net.minecraft.item.Items;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,7 +33,8 @@ public class BeaconBlockMixin {
             if (held.getItem() == Items.DRAGON_BREATH) {
                 //player.sendSystemMessage(Text.of("You used a dragon's breath on a beacon"), player.getUuid());
                 if (BeaconWarpManager.checkValid(pos, world)) {
-                    if (BeaconWarpManager.registerBeacon(pos, world)) {
+                    BeaconWarpManager manager = BeaconWarpManager.get((ServerWorld) world);
+                    if (manager.registerBeacon(pos, world)) {
                         System.out.println("Beacon successfully registered");
                         player.sendSystemMessage(Text.of("Beacon was successfully registered, nice!!"), player.getUuid());
                         world.playSound(null, pos, SoundEvents.BLOCK_BEACON_POWER_SELECT, SoundCategory.BLOCKS, 1, 1);

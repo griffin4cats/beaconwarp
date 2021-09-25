@@ -5,20 +5,30 @@ import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import net.minecraft.world.PersistentState;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.nbt.NbtInt;
+import net.minecraft.nbt.NbtString;
+import net.minecraft.server.world.ServerWorld;
+
 import java.util.*;
 
-public class BeaconWarpManager {
+public class BeaconWarpManager extends PersistentState {
     static int nextID = 1;
     static Map<List<Block>, Integer> beaconMap = new HashMap<>();
     static Map<Integer, List<MinecraftLocation>> channelMap = new HashMap<>();
     static Map<MinecraftLocation, Integer> blockMap = new HashMap<>(); //In the future this could be replaced with storing NBT data in the beacon
 
-    public static boolean registerBeacon(BlockPos pos, World world) {
+    public boolean registerBeacon(BlockPos pos, World world) {
         List<Block> baseBlockList = scanBase(pos, world);
         return registerWithScan(baseBlockList, pos, world);
     }
 
-    public static boolean registerWithScan(List<Block> baseBlockList, BlockPos pos, World world) {
+    public boolean registerWithScan(List<Block> baseBlockList, BlockPos pos, World world) {
+        markDirty();
         if (baseBlockList.size() == 0)
             return false;
         //This register system will ASSUME that there is NO ENTRY for the beacon location in blockMap or channelMap.
@@ -186,7 +196,7 @@ public class BeaconWarpManager {
         return beaconLocation;
     }
 
-    public static List<Block> updateBeacon(BlockPos pos, World world) {
+    public List<Block> updateBeacon(BlockPos pos, World world) {
         MinecraftLocation beaconLocation = new MinecraftLocation(pos, world.getRegistryKey());
         List<Block> baseScan = scanBase(pos, world);
         Integer baseID = beaconMap.get(baseScan); //Integers can be null, ints will just be zero.
@@ -232,7 +242,8 @@ public class BeaconWarpManager {
         return baseScan;
     }
 
-    public static void removeBeacon(MinecraftLocation beaconLocation, int channelID) {
+    public void removeBeacon(MinecraftLocation beaconLocation, int channelID) {
+        markDirty();
         //Removes a beacon from a given ID's channel, as well as from blockMap.
         List<MinecraftLocation> listInChannel = channelMap.get(channelID);
         List<MinecraftLocation> newList = new ArrayList<>();
@@ -253,7 +264,7 @@ public class BeaconWarpManager {
         System.out.println("Beacon successfully removed from blockMap");
     }
 
-    public static void removeBeaconWithLocation(BlockPos pos, World world){
+    public void removeBeaconWithLocation(BlockPos pos, World world){
         //Only call when beacon is being broken
 
         //Removing a beacon at a given location might seem tricky, but it's not
@@ -276,7 +287,7 @@ public class BeaconWarpManager {
         removeBeacon(beaconLocation, beaconID);
     }
 
-    public static boolean isWarpBeacon(BlockPos pos, World world){
+    public boolean isWarpBeacon(BlockPos pos, World world){
         MinecraftLocation beaconLocation = new MinecraftLocation(pos, world.getRegistryKey());
         Integer beaconID = null;
         for (Map.Entry<MinecraftLocation, Integer> entry : blockMap.entrySet()) {
@@ -370,4 +381,137 @@ public class BeaconWarpManager {
         System.out.println("Full print concluded.");
     }
 
+    public static BeaconWarpManager fromNbt(NbtCompound tag) {
+        System.out.println("==readNbt called==");
+        printFullMap();
+        BeaconWarpManager newManager = new BeaconWarpManager();
+
+        //nextID
+        nextID = tag.getInt("Beaconwarp:NextId");
+
+        //beaconMap
+        NbtList bMap = (NbtList) tag.get("Beaconwarp:BeaconMap");
+        System.out.println("beaconMap==========================");
+        System.out.println(bMap);
+        for (net.minecraft.nbt.NbtElement nbtElement : bMap) {
+            System.out.println("new one");
+            NbtCompound thisEntry = (NbtCompound) nbtElement;
+            NbtList thisList =  (NbtList) thisEntry.get("bMapEntryListBlock");
+            List<Block> newBlockList = new ArrayList<>();
+            System.out.println("blucks:");
+            for (int j = 0; j < thisList.size(); j++) {
+                Identifier blockId = new Identifier(thisList.getString(j));
+                newBlockList.add(Registry.BLOCK.get(blockId));
+                System.out.println(Registry.BLOCK.get(blockId));
+            }
+            beaconMap.put(newBlockList, thisEntry.getInt("bMapEntryInteger"));
+            System.out.println("int:" + thisEntry.getInt("bMapEntryInteger"));
+        }
+
+        //channelMap
+        NbtList cMap = (NbtList) tag.get("Beaconwarp:ChannelMap");
+        System.out.println("channelMap==========================");
+        System.out.println(cMap);
+        for (net.minecraft.nbt.NbtElement thisElement : cMap) {
+            System.out.println("new one");
+            NbtCompound thisEntry = (NbtCompound) thisElement;
+            NbtList thisList =  (NbtList) thisEntry.get("cMapEntryListMinecraftLocation");
+            List<MinecraftLocation> newLocationList = new ArrayList<>();
+            System.out.println("locs:");
+            for (net.minecraft.nbt.NbtElement nbtElement : thisList) {
+                newLocationList.add(MinecraftLocation.fromNbt((NbtCompound) nbtElement));
+                System.out.println(MinecraftLocation.fromNbt((NbtCompound) nbtElement));
+            }
+            channelMap.put(thisEntry.getInt("cMapEntryId"), newLocationList);
+            System.out.println("int:" + thisEntry.getInt("cMapEntryId"));
+        }
+
+        //blockMap
+        NbtList blMap =  (NbtList) tag.get("Beaconwarp:BlockMap");
+        System.out.println("blockMap==========================");
+        System.out.println(blMap);
+        for (net.minecraft.nbt.NbtElement nbtElement : blMap) {
+            System.out.println("new one");
+            NbtCompound thisEntry = (NbtCompound) nbtElement;
+            NbtCompound locationAsCompound = thisEntry.getCompound("blMapEntryListMinecraftLocation");
+            MinecraftLocation thisLocation = MinecraftLocation.fromNbt(locationAsCompound);
+            System.out.println(thisLocation.toString() + thisEntry.getInt("blMapEntryId"));
+            blockMap.put(thisLocation, thisEntry.getInt("blMapEntryId"));
+        }
+        System.out.println("==about to return==");
+        printFullMap();
+        return newManager;
+    }
+
+    @Override
+    public NbtCompound writeNbt(NbtCompound tag) {
+        System.out.println("==writeNbt called==");
+        //nextID
+        tag.put("Beaconwarp:NextId", NbtInt.of(nextID));
+
+        //beaconMap
+        NbtList bMapList = new NbtList();
+        for (Map.Entry<List<Block>, Integer> mapEntry : beaconMap.entrySet()) {
+            NbtCompound entryTag = new NbtCompound();
+            NbtList blockList = new NbtList();
+            for (Block b : mapEntry.getKey())
+                blockList.add(NbtString.of(Registry.BLOCK.getId(b).toString()));
+            entryTag.put("bMapEntryListBlock", blockList);
+            entryTag.put("bMapEntryInteger", NbtInt.of(mapEntry.getValue()));
+            bMapList.add(entryTag);
+        }
+        tag.put("Beaconwarp:BeaconMap", bMapList);
+        System.out.println(bMapList);
+
+        //channelMap
+        NbtList cMapList = new NbtList();
+        for (Map.Entry<Integer, List<MinecraftLocation>> mapEntry : channelMap.entrySet()) {
+            NbtCompound entryTag = new NbtCompound();
+            NbtList locationList = new NbtList();
+            for (MinecraftLocation location : mapEntry.getValue())
+                locationList.add(location.toNbt());
+            entryTag.put("cMapEntryId", NbtInt.of(mapEntry.getKey()));
+            entryTag.put("cMapEntryListMinecraftLocation", locationList);
+            cMapList.add(entryTag);
+        }
+        tag.put("Beaconwarp:ChannelMap", cMapList);
+        System.out.println(cMapList);
+
+        //blockMap
+        NbtList blMapList = new NbtList();
+        for (Map.Entry<MinecraftLocation, Integer> mapEntry : blockMap.entrySet()) {
+            NbtCompound entryTag = new NbtCompound();
+            entryTag.put("blMapEntryListMinecraftLocation", mapEntry.getKey().toNbt());
+            entryTag.put("blMapEntryId", NbtInt.of(mapEntry.getValue()));
+            blMapList.add(entryTag);
+        }
+        tag.put("Beaconwarp:BlockMap", blMapList);
+        System.out.println(blMapList);
+        printFullMap();
+        System.out.println("==writeNbt over==");
+        return tag;
+    }
+
+    public static BeaconWarpManager clearedData(NbtCompound tag){
+        System.out.println("==clearedData called==");
+        BeaconWarpManager manager = new BeaconWarpManager();
+        nextID = 1;
+        beaconMap.clear();
+        channelMap.clear();
+        blockMap.clear();
+        return manager;
+    }
+    public BeaconWarpManager() {
+        System.out.println("==BeaconWarpManager constructor called==");
+    }
+
+    public static BeaconWarpManager get(ServerWorld world) {
+        System.out.println("==get called==");
+        boolean clearing = false;
+        if (clearing) {
+            System.out.println("All beaconMap data will now be cleared.");
+            return world.getServer().getOverworld().getPersistentStateManager().getOrCreate(BeaconWarpManager::clearedData, BeaconWarpManager::new, "beaconwarp_manager");
+        }
+        return world.getServer().getOverworld().getPersistentStateManager().getOrCreate(BeaconWarpManager::fromNbt, BeaconWarpManager::new, "beaconwarp_manager");
+    }
 }
