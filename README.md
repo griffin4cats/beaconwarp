@@ -2,7 +2,7 @@
 
 ## Balanced fast travel
 
-Beacon warp is a server-side that adds fast travel capability to beacons, with a goal of providing an intuitive yet balanced method of fast travel.
+Beacon warp is a server-side mod that adds fast travel capability to beacons, with a goal of providing an intuitive yet balanced method of fast travel.
 
 To activate a beacon's warp capabilities, right click a beacon with dragon's breath.
 
