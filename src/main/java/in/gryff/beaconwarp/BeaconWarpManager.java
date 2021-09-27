@@ -382,6 +382,7 @@ public class BeaconWarpManager extends PersistentState {
     }
 
     public static BeaconWarpManager fromNbt(NbtCompound tag) {
+        //Big thanks to Unascribed and other members of their discord guild for help regarding PersistentState and NBT
         System.out.println("==readNbt called==");
         printFullMap();
         BeaconWarpManager newManager = new BeaconWarpManager();

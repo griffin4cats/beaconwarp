@@ -32,15 +32,17 @@ There's a few important things left to do before release.
 - [x] Warp deletion
 - [x] Making singleplayer compatibility
 - [x] Saving data
-- [ ] Config file
+- [x] Config file*
 - [ ] Big code cleanup/optimization
+
+**functional, but not implemented yet*
 
 These are the essential things left before release, but I also have a number of tweaks and extra features that I might decide to add before I release this.
 
-## License
-
-This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
-
+##Credits
 Partially inspired by Maxypoo's [Warp shrines](https://www.planetminecraft.com/data-pack/warp-shrines-teleport-between-locations/).
-
 Also, check out GatKong's [TeleBeacon datapack](https://www.planetminecraft.com/data-pack/telebeacon/)!
+
+Textures in mod icon are modified from Ewan Howell's [F8thful](https://www.ewanhowell.com/?pack=f8thful)
+
+Big thanks to Unascribed and those in their discord guild for all their help.

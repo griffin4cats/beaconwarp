@@ -1,0 +1,28 @@
+{
+    "text.autoconfig.beaconwarp.title": "Beacon Warp",
+    "text.autoconfig.beaconwarp.category.mechanics": "Beacon Warp Mechanics",
+    "text.autoconfig.beaconwarp.category.logging": "Logging",
+    "text.autoconfig.beaconwarp.option.Cooldown": "Cooldown settings",
+
+    "text.autoconfig.beaconwarp.option.maxBeaconLevel": "Maximum beacon level",
+    "text.autoconfig.beaconwarp.option.maxBeaconLevel.@Tooltip[0]": "The maximum level of layers which should be scanned.",
+    "text.autoconfig.beaconwarp.option.maxBeaconLevel.@Tooltip[1]": "Given the number of possible channels,",
+    "text.autoconfig.beaconwarp.option.maxBeaconLevel.@Tooltip[2]": "there is no reason to turn this above 4.",
+    "text.autoconfig.beaconwarp.option.maxBeaconLevel.@Tooltip[3]": "I would really not recommend changing this...",
+
+    "text.autoconfig.beaconwarp.option.Cooldown.cooldownTicks": "Basic cooldown",
+    "text.autoconfig.beaconwarp.option.Cooldown.cooldownTicks.@Tooltip": "Cooldown length (in ticks) applied after warping",
+    "text.autoconfig.beaconwarp.option.Cooldown.cooldownSameWarpEnabled": "Same warp cooldown",
+    "text.autoconfig.beaconwarp.option.Cooldown.cooldownSameWarpEnabled.@Tooltip": "Cooldown length (in ticks) before teleporting with same beacon",
+    "text.autoconfig.beaconwarp.option.Cooldown.cooldownSameWarpTicks.@Tooltip": "Cooldown length (in ticks) before teleporting with same beacon",
+    "text.autoconfig.beaconwarp.option.Cooldown.cooldownSameWarpTicks": "Same warp cooldown",
+
+    "text.autoconfig.beaconwarp.option.allowRotate": "Allow rotation",
+    "text.autoconfig.beaconwarp.option.allowRotate.@Tooltip": "Enables rotated beacon bases counting as the same base",
+    "text.autoconfig.beaconwarp.option.allowReflect": "Allow reflection",
+    "text.autoconfig.beaconwarp.option.allowReflect.@Tooltip": "Enables reflected beacon bases counting as the same base",
+    "text.autoconfig.beaconwarp.option.soundActivate": "Activation sound",
+    "text.autoconfig.beaconwarp.option.soundActivate.@Tooltip": "Sound to play when activating a beacon",
+    "text.autoconfig.beaconwarp.option.doAllLogging": "Enable console logging",
+    "text.autoconfig.beaconwarp.option.doAllLogging.@Tooltip": "Enables logging for various beacon warp events"
+}

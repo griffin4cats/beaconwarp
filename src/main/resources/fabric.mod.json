@@ -1,38 +1,34 @@
 {
-  "schemaVersion": 1,
-  "id": "beaconwarp",
-  "version": "0.6.0",
+    "schemaVersion": 1,
+    "id": "beaconwarp",
+    "version": "${version}",
 
-  "name": "Beacon Warp Mod",
-  "description": "A mod adding balanced fast travel functionality to beacons",
-  "authors": [
-    "griffin4cats"
-  ],
-  "contact": {
-    "homepage": "https://github.com/griffin4cats",
-    "sources": "https://github.com/griffin4cats/beaconwarp"
-  },
+    "name": "Beacon Warp",
+    "description": "A mod adding balanced fast travel functionality to beacons",
+    "authors": ["griffin4cats"],
+    "contact": {
+        "homepage": "https://github.com/griffin4cats",
+        "sources": "https://github.com/griffin4cats/beaconwarp",
+        "issues": "https://github.com/griffin4cats/beaconwarp/issues",
+        "discord": "Not yet, but coming soon."
+    },
 
-  "license": "CC0-1.0",
-  "icon": "assets/beaconwarp/icon.png",
+    "license": "MIT",
 
-  "environment": "*",
-  "entrypoints": {
-    "server": [
-      "in.gryff.beaconwarp.BeaconWarp"
-    ]
-  },
-  "mixins": [
-    "beaconwarp.mixins.json"
-  ],
+    "environment": "*",
+    "entrypoints": {
+        "main": ["in.gryff.beaconwarp.BeaconWarp"],
+        "modmenu": ["in.gryff.beaconwarp.config.BeaconWarpModMenuCompatibility"]
+    },
+    "mixins": ["beaconwarp.mixins.json"],
+    "icon": "assets/beaconwarp/icon.png",
 
-  "depends": {
-    "fabricloader": ">=0.11.3",
-    "fabric": "*",
-    "minecraft": "1.17.x",
-    "java": ">=16"
-  },
-  "suggests": {
-    "another-mod": "*"
-  }
+    "depends": {
+        "fabricloader": ">=0.11.3",
+        "fabric": "*",
+        "minecraft": "1.17.x",
+        "java": ">=16"
+    },
+    "suggests": {
+    }
 }
