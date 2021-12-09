@@ -2,6 +2,7 @@ package in.gryff.beaconwarp.mixin.entity;
 
 import in.gryff.beaconwarp.BeaconWarpManager;
 import in.gryff.beaconwarp.MinecraftLocation;
+import in.gryff.beaconwarp.config.BeaconWarpConfig;
 import net.minecraft.block.BeaconBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -41,6 +42,7 @@ public abstract class ServerPlayerMixin extends LivingEntity {
 
             if(block instanceof BeaconBlock) {
                 if (beaconwarpCooldown == 0) {
+                    BeaconWarpConfig config = BeaconWarpConfig.getInstance();
                     BeaconWarpManager manager = BeaconWarpManager.get((ServerWorld) world);
                     RegistryKey<World> worldKey = world.getRegistryKey();
                     MinecraftLocation worldLocation = new MinecraftLocation(posBelowPlayer, worldKey);
@@ -72,7 +74,7 @@ public abstract class ServerPlayerMixin extends LivingEntity {
                         ServerPlayerEntity player = (ServerPlayerEntity)(Object)this; //this is so cursed. i hate it.
                         player.teleport(teleportWorld,getX() + x, getY() + y, getZ() + z, this.getYaw(), this.getPitch());
                     }
-                    beaconwarpCooldown = 20;
+                    beaconwarpCooldown = config.Cooldown.cooldownTicks;
                 } else {
                     if ((beaconwarpCooldown % 5) == 0)
                         sendSystemMessage(Text.of("Sorry, you still have a cooldown for another " + beaconwarpCooldown + " ticks!"), getUuid());

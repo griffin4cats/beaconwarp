@@ -42,9 +42,10 @@ public class BeaconWarpConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip()
     public boolean allowRotate = true;
 
+    @ConfigEntry.Gui.Excluded //Unimplemented for now
     @ConfigEntry.Category(value = "mechanics")
     @ConfigEntry.Gui.Tooltip()
-    public boolean allowReflect = false;
+    public boolean allowReflect = false;    
 
     @ConfigEntry.Category(value = "mechanics")
     @ConfigEntry.Gui.Tooltip()

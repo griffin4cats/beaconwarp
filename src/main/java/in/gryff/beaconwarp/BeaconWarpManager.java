@@ -1,5 +1,6 @@
 package in.gryff.beaconwarp;
 
+import in.gryff.beaconwarp.config.BeaconWarpConfig;
 import net.minecraft.block.Block;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
@@ -35,6 +36,7 @@ public class BeaconWarpManager extends PersistentState {
         MinecraftLocation beaconLocation = new MinecraftLocation(pos, world.getRegistryKey());
         System.out.println("--- Attempting to register beacon ---");
         //printBase(parseBase(baseBlockList));
+
         if (!(beaconMap.get(baseBlockList) == null)) {
             System.out.println("Beacon base already exists in list. Here's a list of all beacon block positions in that list:");
             List<MinecraftLocation> destinations = channelMap.get(beaconMap.get(baseBlockList));
@@ -48,33 +50,9 @@ public class BeaconWarpManager extends PersistentState {
                 }
             }
         } else {
-            System.out.println("Beacon not already registered. Registering beacon, and checking. ID is " + nextID);
-            beaconMap.put(baseBlockList, nextID);
-            //The beacon may have 4-fold symmetry, so we check for that.
-            List<Block> newList = new ArrayList<>(rotateBase(baseBlockList));
-            if (newList.equals(baseBlockList)) {
-                //System.out.println("Base has 4-fold symmetry, cool!");
-            } else {
-                //System.out.println("Beacon appears to not have 4-fold symmetry... I hope?");
-                beaconMap.put(newList, nextID);
-                //printBase(parseBase(newList));
-                newList = rotateBase(newList);
-                //The beacon may have 2-fold symmetry, so we check for that, too
-                if (newList.equals(baseBlockList)) {
-                    //System.out.println("Base has 2-fold symmetry, neat!");
-                } else {
-                    //System.out.println("Beacon appears to not have 2-fold symmetry... I hope?");
-                    //printBase(parseBase(newList));
-                    beaconMap.put(newList, nextID);
-                    newList = rotateBase(newList);
-                    //printBase(parseBase(newList));
-                    beaconMap.put(newList, nextID);
-                    System.out.println("Okay, that's done... I hope?");
-                }
-            }
-            nextID += 1;
-            System.out.println("Base successfully registered in beacon map. Now for the channel map.");
+            addAllToList(baseBlockList);
         }
+
         int thisID = beaconMap.get(baseBlockList);
         blockMap.put(beaconLocation, thisID);
         System.out.println(beaconLocation);
@@ -84,6 +62,7 @@ public class BeaconWarpManager extends PersistentState {
             List<MinecraftLocation> newList = new ArrayList<>();
             channelMap.put(thisID, newList);
         }
+
         //System.out.println("Adding to channel map");
         List<MinecraftLocation> thisList = channelMap.get(thisID);
         thisList.add(beaconLocation);
@@ -93,6 +72,61 @@ public class BeaconWarpManager extends PersistentState {
         System.out.println("--- Registry complete ---");
         //printFullMap();
         return true;
+    }
+
+    private void addAllToList(List<Block> baseBlockList) {
+        System.out.println("Beacon not already registered. Registering beacon, and checking. ID is " + nextID);
+        BeaconWarpConfig config = BeaconWarpConfig.getInstance();
+        int numPasses = 1;
+        boolean hasReflection = false;
+        List<Block> newList = new ArrayList<>();
+
+        if (config.allowRotate) {
+            newList = rotateBase(baseBlockList);
+            if (newList.equals(baseBlockList)) {
+                numPasses = 1;
+                System.out.println("Base has four-fold rotational symmetry.");
+            } else {
+                newList = rotateBase(newList);
+                if (newList.equals(baseBlockList)) {
+                    numPasses = 2;
+                    System.out.println("Base has two-fold rotational symmetry.");
+                } else {
+                    numPasses = 4;
+                    System.out.println("Base has no rotational symmetry.");
+                }
+            }
+        }
+
+        if (config.allowReflect){
+            newList = reflectBase(baseBlockList);
+            hasReflection = (newList.equals(baseBlockList));
+        }
+
+        beaconMap.put(baseBlockList, nextID);
+        //The beacon may have 4-fold symmetry, so we check for that.
+        if (newList.equals(baseBlockList)) {
+            //System.out.println("Base has 4-fold symmetry, cool!");
+        } else {
+            //System.out.println("Beacon appears to not have 4-fold symmetry... I hope?");
+            beaconMap.put(newList, nextID);
+            //printBase(parseBase(newList));
+            newList = rotateBase(newList);
+            //The beacon may have 2-fold symmetry, so we check for that, too
+            if (newList.equals(baseBlockList)) {
+                //System.out.println("Base has 2-fold symmetry, neat!");
+            } else {
+                //System.out.println("Beacon appears to not have 2-fold symmetry... I hope?");
+                //printBase(parseBase(newList));
+                beaconMap.put(newList, nextID);
+                newList = rotateBase(newList);
+                //printBase(parseBase(newList));
+                beaconMap.put(newList, nextID);
+                System.out.println("Okay, that's done... I hope?");
+            }
+        }
+        nextID += 1;
+        System.out.println("Base successfully registered in beacon map. Now for the channel map.");
     }
 
     public static List<Block> scanBase(BlockPos pos, World world) {
@@ -155,6 +189,13 @@ public class BeaconWarpManager extends PersistentState {
             }
         }
         //Flip sub-lists, flipping the square over the vertical axis
+        newList = reflectList(newList);
+        return newList;
+    }
+
+    public static List<Block> reflectList(List<Block> inputList) {
+        int width = (int) Math.sqrt(inputList.size());
+        List<Block> newList = new ArrayList<>(inputList);
         for (int i = 0; i <= width - 1; i++) {
             for (int j = 0; j <= ((width - 1) / 2) - 1; j++) {
                 Block tempBlock = newList.get((width * i) + j);
@@ -163,7 +204,6 @@ public class BeaconWarpManager extends PersistentState {
                 newList.set(second, tempBlock);
             }
         }
-        //System.out.println("List done being rotated. List size: " + inputList.size());
         return newList;
     }
 
@@ -172,6 +212,15 @@ public class BeaconWarpManager extends PersistentState {
         List<Block> outList = new ArrayList<>();
         for (List<Block> list : blockList) {
             outList.addAll(rotateList(list));
+        }
+        return outList;
+    }
+
+    public static List<Block> reflectBase(List<Block> inputList) {
+        List<List<Block>> blockList = parseBase(inputList);
+        List<Block> outList = new ArrayList<>();
+        for (List<Block> list : blockList) {    
+            outList.addAll(reflectList(list));
         }
         return outList;
     }
@@ -264,7 +313,7 @@ public class BeaconWarpManager extends PersistentState {
         System.out.println("Beacon successfully removed from blockMap");
     }
 
-    public void removeBeaconWithLocation(BlockPos pos, World world){
+    public void removeBeaconWithLocation(BlockPos pos, World world) {
         //Only call when beacon is being broken
 
         //Removing a beacon at a given location might seem tricky, but it's not
@@ -287,7 +336,7 @@ public class BeaconWarpManager extends PersistentState {
         removeBeacon(beaconLocation, beaconID);
     }
 
-    public boolean isWarpBeacon(BlockPos pos, World world){
+    public boolean isWarpBeacon(BlockPos pos, World world) {
         MinecraftLocation beaconLocation = new MinecraftLocation(pos, world.getRegistryKey());
         Integer beaconID = null;
         for (Map.Entry<MinecraftLocation, Integer> entry : blockMap.entrySet()) {
@@ -397,7 +446,7 @@ public class BeaconWarpManager extends PersistentState {
         for (net.minecraft.nbt.NbtElement nbtElement : bMap) {
             System.out.println("new one");
             NbtCompound thisEntry = (NbtCompound) nbtElement;
-            NbtList thisList =  (NbtList) thisEntry.get("bMapEntryListBlock");
+            NbtList thisList = (NbtList) thisEntry.get("bMapEntryListBlock");
             List<Block> newBlockList = new ArrayList<>();
             System.out.println("blucks:");
             for (int j = 0; j < thisList.size(); j++) {
@@ -416,7 +465,7 @@ public class BeaconWarpManager extends PersistentState {
         for (net.minecraft.nbt.NbtElement thisElement : cMap) {
             System.out.println("new one");
             NbtCompound thisEntry = (NbtCompound) thisElement;
-            NbtList thisList =  (NbtList) thisEntry.get("cMapEntryListMinecraftLocation");
+            NbtList thisList = (NbtList) thisEntry.get("cMapEntryListMinecraftLocation");
             List<MinecraftLocation> newLocationList = new ArrayList<>();
             System.out.println("locs:");
             for (net.minecraft.nbt.NbtElement nbtElement : thisList) {
@@ -428,7 +477,7 @@ public class BeaconWarpManager extends PersistentState {
         }
 
         //blockMap
-        NbtList blMap =  (NbtList) tag.get("Beaconwarp:BlockMap");
+        NbtList blMap = (NbtList) tag.get("Beaconwarp:BlockMap");
         System.out.println("blockMap==========================");
         System.out.println(blMap);
         for (net.minecraft.nbt.NbtElement nbtElement : blMap) {
@@ -493,7 +542,7 @@ public class BeaconWarpManager extends PersistentState {
         return tag;
     }
 
-    public static BeaconWarpManager clearedData(NbtCompound tag){
+    public static BeaconWarpManager clearedData(NbtCompound tag) {
         System.out.println("==clearedData called==");
         BeaconWarpManager manager = new BeaconWarpManager();
         nextID = 1;
@@ -502,6 +551,7 @@ public class BeaconWarpManager extends PersistentState {
         blockMap.clear();
         return manager;
     }
+
     public BeaconWarpManager() {
         System.out.println("==BeaconWarpManager constructor called==");
     }
