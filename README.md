@@ -33,11 +33,14 @@ There's a few important things left to do before release.
 - [x] Making singleplayer compatibility
 - [x] Saving data
 - [x] Config file*
+- [ ] Port to 1.18
 - [ ] Big code cleanup/optimization
 
 **functional, but not implemented yet*
 
 These are the essential things left before release, but I also have a number of tweaks and extra features that I might decide to add before I release this.
+
+
 
 ## Credits
 Partially inspired by Maxypoo's [Warp shrines](https://www.planetminecraft.com/data-pack/warp-shrines-teleport-between-locations/).
