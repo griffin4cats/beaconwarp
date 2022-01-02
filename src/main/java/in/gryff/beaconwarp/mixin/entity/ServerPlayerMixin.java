@@ -28,7 +28,7 @@ public abstract class ServerPlayerMixin extends LivingEntity {
 
     @Shadow public abstract void sendSystemMessage(Text message, UUID sender);
 
-    @Shadow public abstract ServerWorld getServerWorld();
+//    @Shadow public abstract ServerWorld getServerWorld();
 
     @Inject( method = "tick", at = @At("RETURN"))
     void onTick(CallbackInfo ci) {      //Run this code every tick
