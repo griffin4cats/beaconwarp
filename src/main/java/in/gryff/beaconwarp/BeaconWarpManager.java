@@ -1,5 +1,6 @@
 package in.gryff.beaconwarp;
 
+import com.google.common.math.DoubleMath;
 import in.gryff.beaconwarp.config.BeaconWarpConfig;
 import net.minecraft.block.Block;
 import net.minecraft.tag.BlockTags;
@@ -70,7 +71,7 @@ public class BeaconWarpManager extends PersistentState {
         channelMap.put(thisID, thisList);
         //System.out.println("If all went well, this beacon should be registered.");
         System.out.println("--- Registry complete ---");
-        //printFullMap();
+        printFullMap();
         return true;
     }
 
@@ -99,10 +100,31 @@ public class BeaconWarpManager extends PersistentState {
         }
 
         if (config.allowReflect){
+            hasReflection = false;
             newList = reflectBase(baseBlockList);
-            hasReflection = (newList.equals(baseBlockList));
+            if (newList.equals(baseBlockList))
+                hasReflection = true;
+            if (numPasses == 4){
+                newList = rotateBase(newList);
+                if (newList.equals(baseBlockList))
+                    hasReflection = true;
+            }
         }
 
+        beaconMap.put(baseBlockList, nextID);
+        System.out.println("pls work");
+        if (numPasses == 2){
+            beaconMap.put(rotateBase(baseBlockList), nextID);
+        }
+        if (numPasses == 4){
+            baseBlockList = rotateBase(baseBlockList);
+            beaconMap.put((baseBlockList), nextID);
+            baseBlockList = rotateBase(baseBlockList);
+            beaconMap.put(rotateBase(baseBlockList), nextID);
+            baseBlockList = rotateBase(baseBlockList);
+            beaconMap.put(rotateBase(baseBlockList), nextID);
+        }
+        /*
         beaconMap.put(baseBlockList, nextID);
         //The beacon may have 4-fold symmetry, so we check for that.
         if (newList.equals(baseBlockList)) {
@@ -125,8 +147,10 @@ public class BeaconWarpManager extends PersistentState {
                 System.out.println("Okay, that's done... I hope?");
             }
         }
+        */
         nextID += 1;
         System.out.println("Base successfully registered in beacon map. Now for the channel map.");
+        printFullMap();
     }
 
     public static List<Block> scanBase(BlockPos pos, World world) {
@@ -223,7 +247,7 @@ public class BeaconWarpManager extends PersistentState {
             outList.addAll(reflectList(list));
         }
         return outList;
-    }
+    }   
 
     public static MinecraftLocation getBeaconTeleport(BlockPos pos, World world, List<Block> baseBlockList) {
         MinecraftLocation beaconLocation = new MinecraftLocation(pos, world.getRegistryKey());
@@ -348,6 +372,62 @@ public class BeaconWarpManager extends PersistentState {
         if (beaconID != null)
             System.out.println("And the blockMap value is " + beaconID);
         return beaconID != null;
+    }
+
+    public int countBeaconScore(List<Block> baseBlockList){
+        System.out.println("Counting beacon base score");
+        BeaconWarpConfig config = BeaconWarpConfig.getInstance();
+        int score = 0;
+
+        for (Block baseBlock: baseBlockList) {
+            String tString = baseBlock.getTranslationKey();
+            switch (tString) {
+                case "minecraft:iron_block" -> score += config.Cooldown.scoreIron;
+                case "minecraft:gold_block" -> score += config.Cooldown.scoreGold;
+                case "minecraft:emerald_block" -> score += config.Cooldown.scoreEmerald;
+                case "minecraft:diamond_block" -> score += config.Cooldown.scoreDiamond;
+                case "minecraft:netherite_block" -> score += config.Cooldown.scoreNetherite;
+            }
+        }
+        return score;
+    }
+
+    public int getCooldownTicks(float beaconScore){
+        //This math may not make sense at first, go to https://www.desmos.com/calculator/e3clqlhekj for the full derivation.
+        //I could do this in one line but let's make this somewhat readable.
+        BeaconWarpConfig config = BeaconWarpConfig.getInstance();
+        float minCooldown = config.Cooldown.cooldownMinTicks;
+        float maxCooldown = config.Cooldown.cooldownMaxTicks;
+        float minScore = config.Cooldown.cooldownMinScore;
+        float maxScore = config.Cooldown.cooldownMaxScore;
+
+        double temp = beaconScore / minScore;
+        double temp2 = maxScore / minScore;
+        temp = DoubleMath.log2(temp) / DoubleMath.log2(temp2);
+        temp = 1 - temp;
+        double score = maxCooldown / minCooldown;
+        score = Math.pow(score, temp);
+        return (int) Math.round(score * minCooldown);
+    }
+
+    public boolean scoreValidWarp (int score){
+        System.out.println("Score: " + score);
+        BeaconWarpConfig config = BeaconWarpConfig.getInstance();
+        if (score >= config.minTeleportScore)
+            System.out.println("This is valid for teleportation");
+        else
+            System.out.println("This is NOT valid for teleportation");
+        return (score >= config.minTeleportScore);
+    }
+
+    public boolean scoreValidInterdimensional (int score){
+        System.out.println("Score: " + score);
+        BeaconWarpConfig config = BeaconWarpConfig.getInstance();
+        if (score >= config.minTeleportScore)
+            System.out.println("This is valid for teleportation");
+        else
+            System.out.println("This is NOT valid for teleportation");
+        return (score >= config.minInterdimensionalScore);
     }
 
     public static List<List<Block>> parseBase(List<Block> blockList) {
@@ -558,10 +638,12 @@ public class BeaconWarpManager extends PersistentState {
 
     public static BeaconWarpManager get(ServerWorld world) {
         System.out.println("==get called==");
-        boolean clearing = false;
+        boolean clearing = true;
         if (clearing) {
             System.out.println("All beaconMap data will now be cleared.");
             return world.getServer().getOverworld().getPersistentStateManager().getOrCreate(BeaconWarpManager::clearedData, BeaconWarpManager::new, "beaconwarp_manager");
+        } else {
+            System.out.println("Will not clear data");
         }
         return world.getServer().getOverworld().getPersistentStateManager().getOrCreate(BeaconWarpManager::fromNbt, BeaconWarpManager::new, "beaconwarp_manager");
     }

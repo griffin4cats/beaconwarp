@@ -27,6 +27,10 @@ public class MinecraftLocation {
         return key;
     }
 
+    public String getKeyString(){
+        return key.getValue().toString();
+    }
+
     public BlockPos getPos(){
         return pos;
     }

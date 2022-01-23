@@ -53,7 +53,6 @@ public abstract class ServerPlayerMixin extends LivingEntity {
 
                     //We are going to update the beacon we're teleporting to. After we update it, it may have a different channel.
                     //So, we make a copy of the location, update the beacon, check if the teleport location has changed, and if it has, we repeat. We repeat until the location stays the same.
-
                     teleportWorld = this.getServer().getWorld(teleportLocation.getKey());
                     manager.updateBeacon(teleportLocation.getPos(),teleportWorld);
                     nextTeleportLocation = BeaconWarpManager.getBeaconTeleport(posBelowPlayer, world, baseScan);
@@ -65,16 +64,33 @@ public abstract class ServerPlayerMixin extends LivingEntity {
                     }
                     if (teleportLocation.equals(worldLocation)) {
                         sendSystemMessage(Text.of("Ope, teleport ain't working, sorry bud"), getUuid());
+                        //This is the default cooldown
+                        beaconwarpCooldown = config.Cooldown.cooldownTicks;
                     } else {
-                        sendSystemMessage(Text.of("Teleporting player from " + worldLocation + " to " + teleportLocation), getUuid());
-                        System.out.println("Teleporting player from " + worldLocation + " to " + teleportLocation);
-                        double x = teleportLocation.getPos().getX()-worldLocation.getPos().getX();
-                        double y = teleportLocation.getPos().getY()-worldLocation.getPos().getY();
-                        double z = teleportLocation.getPos().getZ()-worldLocation.getPos().getZ();
-                        ServerPlayerEntity player = (ServerPlayerEntity)(Object)this; //this is so cursed. i hate it.
-                        player.teleport(teleportWorld,getX() + x, getY() + y, getZ() + z, this.getYaw(), this.getPitch());
+                        int cooldown;
+                        //Now that we know the location we're warping to, we need to check if it's in the same world or not.
+                        int beaconScore = manager.countBeaconScore(baseScan);
+                        boolean scoreCanWarp = false;
+                        if (nextTeleportLocation.getKeyString().equals(worldKey.toString())){
+                            if (beaconScore >= config.minTeleportScore) {
+                                scoreCanWarp = true;
+                            }
+                        } else if (beaconScore >= config.minInterdimensionalScore){
+                            scoreCanWarp = true;
+                        }
+
+                        if (scoreCanWarp) {
+                            cooldown = manager.getCooldownTicks(beaconScore);
+                            sendSystemMessage(Text.of("Teleporting player from " + worldLocation + " to " + teleportLocation), getUuid());
+                            System.out.println("Teleporting player from " + worldLocation + " to " + teleportLocation);
+                            double x = teleportLocation.getPos().getX() - worldLocation.getPos().getX();
+                            double y = teleportLocation.getPos().getY() - worldLocation.getPos().getY();
+                            double z = teleportLocation.getPos().getZ() - worldLocation.getPos().getZ();
+                            ServerPlayerEntity player = (ServerPlayerEntity) (Object) this; //this is so cursed. i hate it.
+                            player.teleport(teleportWorld, getX() + x, getY() + y, getZ() + z, this.getYaw(), this.getPitch());
+                            beaconwarpCooldown = cooldown;
+                        }
                     }
-                    beaconwarpCooldown = config.Cooldown.cooldownTicks;
                 } else {
                     if ((beaconwarpCooldown % 5) == 0)
                         sendSystemMessage(Text.of("Sorry, you still have a cooldown for another " + beaconwarpCooldown + " ticks!"), getUuid());

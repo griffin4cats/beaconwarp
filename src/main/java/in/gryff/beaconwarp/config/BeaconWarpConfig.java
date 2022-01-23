@@ -32,7 +32,43 @@ public class BeaconWarpConfig implements ConfigData {
         @ConfigEntry.Gui.Excluded //Unimplemented for now
         @ConfigEntry.Gui.Tooltip()
         public int cooldownSameWarpTicks = 10;
+
+        @ConfigEntry.Gui.Tooltip()
+        public int scoreIron = 2;
+
+        @ConfigEntry.Gui.Tooltip()
+        public int scoreGold = 3;
+
+        @ConfigEntry.Gui.Tooltip()
+        public int scoreEmerald = 5;
+
+        @ConfigEntry.Gui.Tooltip()
+        public int scoreDiamond = 20;
+
+        @ConfigEntry.Gui.Tooltip()
+        public int scoreNetherite = 20;
+
+        @ConfigEntry.Gui.Tooltip()
+        public int cooldownMinTicks = 100;
+
+        @ConfigEntry.Gui.Tooltip()
+        public int cooldownMaxTicks = 900;
+
+        @ConfigEntry.Gui.Tooltip()
+        public int cooldownMinScore = 329;
+
+        @ConfigEntry.Gui.Tooltip()
+        public int cooldownMaxScore = 13120;
+
     }
+
+    @ConfigEntry.Category(value = "mechanics")
+    @ConfigEntry.Gui.Tooltip(count = 4)
+    public int minTeleportScore = 329;
+
+    @ConfigEntry.Category(value = "mechanics")
+    @ConfigEntry.Gui.Tooltip(count = 4)
+    public int minInterdimensionalScore = 493;
 
     @ConfigEntry.Category(value = "mechanics")
     @ConfigEntry.Gui.Tooltip(count = 4)
