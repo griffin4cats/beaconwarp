@@ -35,18 +35,18 @@ public class BeaconWarpManager extends PersistentState {
             return false;
         //This register system will ASSUME that there is NO ENTRY for the beacon location in blockMap or channelMap.
         MinecraftLocation beaconLocation = new MinecraftLocation(pos, world.getRegistryKey());
-        System.out.println("--- Attempting to register beacon ---");
+        bwLog("--- Attempting to register beacon ---", 2);
         //printBase(parseBase(baseBlockList));
 
         if (!(beaconMap.get(baseBlockList) == null)) {
-            System.out.println("Beacon base already exists in list. Here's a list of all beacon block positions in that list:");
+            bwLog("Beacon base already exists in list. Here's a list of all beacon block positions in that list:", 2);
             List<MinecraftLocation> destinations = channelMap.get(beaconMap.get(baseBlockList));
             for (MinecraftLocation location : destinations) {
                 printBlockPos(location);
             }
             for (MinecraftLocation location : destinations) {
                 if (location.equals(beaconLocation)) {
-                    System.out.println("Beacon already in list");
+                    bwLog("Beacon already in list", 2);
                     return false;
                 }
             }
@@ -56,10 +56,10 @@ public class BeaconWarpManager extends PersistentState {
 
         int thisID = beaconMap.get(baseBlockList);
         blockMap.put(beaconLocation, thisID);
-        System.out.println(beaconLocation);
+        bwLog(beaconLocation.toString(), 2);
         //System.out.println("Channel ID: " + thisID);
         if (!channelMap.containsKey(thisID)) {
-            System.out.println("Channel ID does not exist, opening channel with blank list.");
+            bwLog("Channel ID does not exist, opening channel with blank list.",2);
             List<MinecraftLocation> newList = new ArrayList<>();
             channelMap.put(thisID, newList);
         }
@@ -70,13 +70,13 @@ public class BeaconWarpManager extends PersistentState {
         channelMap.remove(thisID);
         channelMap.put(thisID, thisList);
         //System.out.println("If all went well, this beacon should be registered.");
-        System.out.println("--- Registry complete ---");
+        bwLog("--- Registry complete ---", 2);
         printFullMap();
         return true;
     }
 
     private void addAllToList(List<Block> baseBlockList) {
-        System.out.println("Beacon not already registered. Registering beacon, and checking. ID is " + nextID);
+        bwLog("Beacon not already registered. Registering beacon, and checking. ID is " + nextID, 1);
         BeaconWarpConfig config = BeaconWarpConfig.getInstance();
         int numPasses = 1;
         boolean hasReflection = false;
@@ -86,15 +86,15 @@ public class BeaconWarpManager extends PersistentState {
             newList = rotateBase(baseBlockList);
             if (newList.equals(baseBlockList)) {
                 numPasses = 1;
-                System.out.println("Base has four-fold rotational symmetry.");
+                bwLog("Base has four-fold rotational symmetry.", 3);
             } else {
                 newList = rotateBase(newList);
                 if (newList.equals(baseBlockList)) {
                     numPasses = 2;
-                    System.out.println("Base has two-fold rotational symmetry.");
+                    bwLog("Base has two-fold rotational symmetry.", 3);
                 } else {
                     numPasses = 4;
-                    System.out.println("Base has no rotational symmetry.");
+                    bwLog("Base has no rotational symmetry.", 3);
                 }
             }
         }
@@ -112,7 +112,7 @@ public class BeaconWarpManager extends PersistentState {
         }
 
         beaconMap.put(baseBlockList, nextID);
-        System.out.println("pls work");
+        bwLog("pls work", 3);
         if (numPasses == 2){
             beaconMap.put(rotateBase(baseBlockList), nextID);
         }
@@ -149,12 +149,12 @@ public class BeaconWarpManager extends PersistentState {
         }
         */
         nextID += 1;
-        System.out.println("Base successfully registered in beacon map. Now for the channel map.");
+        bwLog("Base successfully registered in beacon map. Now for the channel map.", 2);
         printFullMap();
     }
 
     public static List<Block> scanBase(BlockPos pos, World world) {
-        System.out.println("Scanning base...");
+        bwLog("Scanning base...", 2);
         List<Block> blockList = new ArrayList<>();
         List<Block> tempList = new ArrayList<>();
         int i = pos.getX();
@@ -166,7 +166,7 @@ public class BeaconWarpManager extends PersistentState {
                 for (int n = -l; n <= l; n++) {
                     if (!world.getBlockState(new BlockPos(i + m, j - l, k + n)).isIn(BlockTags.BEACON_BASE_BLOCKS)) {
                         tempList.clear();
-                        System.out.println("Base finished scanning");
+                        bwLog("Base finished scanning", 2);
                         //printBase(parseBase(blockList));
                         //System.out.println("This beacon found an invalid block, so it's done scanning.");
                         return blockList;
@@ -175,16 +175,16 @@ public class BeaconWarpManager extends PersistentState {
                     tempList.add(currentBlock);
                 }
             }
-            System.out.println("Beacon successfully scanned through tier " + l);
+            bwLog("Beacon successfully scanned through tier " + l, 3);
             blockList.addAll(tempList);
             tempList.clear();
         }
-        System.out.println("Base successfully scanned.");
+        bwLog("Base successfully scanned.", 2);
         return blockList;
     }
 
     public static boolean checkValid(BlockPos pos, World world) {
-        System.out.println("Checking if beacon base is valid");
+        bwLog("Checking if beacon base is valid", 2);
         int i = pos.getX();
         int j = pos.getY();
         int k = pos.getZ();
@@ -192,11 +192,11 @@ public class BeaconWarpManager extends PersistentState {
         for (int l = 0; l <= 8; l++) {
             //System.out.println("Checking block: " + Integer.toString(i+(l%3)-1) + " " + Integer.toString(j-1) + " " + Integer.toString(k+(l/3)-1));
             if (!world.getBlockState(new BlockPos(i + (l % 3) - 1, j - 1, k + (l / 3) - 1)).isIn(BlockTags.BEACON_BASE_BLOCKS)) {
-                System.out.println("Not valid");
+                bwLog("Not valid", 2);
                 return false;
             }
         }
-        System.out.println("Oh neat, it's valid");
+        bwLog("Oh neat, it's valid", 3);
         return true;
     }
 
@@ -251,21 +251,21 @@ public class BeaconWarpManager extends PersistentState {
 
     public static MinecraftLocation getBeaconTeleport(BlockPos pos, World world, List<Block> baseBlockList) {
         MinecraftLocation beaconLocation = new MinecraftLocation(pos, world.getRegistryKey());
-        System.out.println("Received information, attempting beacon warp");
+        bwLog("Received information, attempting beacon warp", 2);
         if (!beaconMap.containsKey(baseBlockList)) {
-            System.out.println("Cannot teleport, block list not found!");
+            bwLog("Cannot teleport, block list not found!", 1);
             return beaconLocation;
         }
         List<MinecraftLocation> posList = channelMap.get(beaconMap.get(baseBlockList));
         for (int i = 0; i < posList.size(); i++) {
             MinecraftLocation location = posList.get(i);
             if (location.equals(beaconLocation)) {
-                System.out.println("Beacon is at index " + i + " of " + posList.size());
-                System.out.println("Returning teleport location...");
+                bwLog("Beacon is at index " + i + " of " + posList.size(), 3);
+                bwLog("Returning teleport location...", 3);
                 return posList.get((i + 1) % posList.size());
             }
         }
-        System.out.println("This beacon is not actually in the warp list! Cancelling teleport.");
+        bwLog("This beacon is not actually in the warp list! Cancelling teleport.", 2);
         return beaconLocation;
     }
 
@@ -281,35 +281,35 @@ public class BeaconWarpManager extends PersistentState {
             }
         }
         if (world.getBlockState(pos).getBlock().getTranslationKey().equals("block.minecraft.beacon")) {
-            System.out.println("Beacon update found beacon.");
+            bwLog("Beacon update found beacon.", 2);
             if (blockID == null) {
                 if (baseID != null) {
-                    System.out.println("given blockID was null... why... Okay, let's check if it's in the system at all.");
-                    System.out.println("So, here's our location: " + beaconLocation);
+                    bwLog("given blockID was null... why... Okay, let's check if it's in the system at all.", 3);
+                    bwLog("So, here's our location: " + beaconLocation, 3);
                     for (Map.Entry<MinecraftLocation, Integer> entry : blockMap.entrySet()) {
                         MinecraftLocation entryLocation = entry.getKey();
-                        System.out.println(entryLocation);
+                        bwLog(entryLocation.toString(), 3);
                         if (entry.getKey().equals(beaconLocation)) {
-                            System.out.println("Well shit, it's in the list... This means there's something wrong. VERY VERY WRONG.");
+                            bwLog("Well shit, it's in the list... This means there's something wrong. VERY VERY WRONG.", 1);
                         }
                     }
                 } else {
-                    System.out.println("Both baseID and blockID are null. THIS IS NOT A WARP BEACON.");
+                    bwLog("Both baseID and blockID are null. THIS IS NOT A WARP BEACON.", 2);
                 }
             } else if (baseID == null) {
-                System.out.println("baseID is null, we need to register this beacon again");
+                bwLog("baseID is null, we need to register this beacon again", 3);
                 removeBeacon(beaconLocation, blockID);
                 if (registerWithScan(baseScan, pos, world))
-                    System.out.println("UPDATE SUCCESSFUL!");
+                    bwLog("UPDATE SUCCESSFUL!", 2);
             } else if (baseID.equals(blockID)) {
                 //Beacon doesn't need to be updated
-                System.out.println("This beacon doesn't need to be updated.");
+                bwLog("This beacon doesn't need to be updated.", 2);
             } else {
-                System.out.println("baseID and blockID are not equal! this beacon must be updated!");
-                System.out.println("baseID: " + baseID + ", blockID: " + blockID);
+                bwLog("baseID and blockID are not equal! this beacon must be updated!", 3);
+                bwLog("baseID: " + baseID + ", blockID: " + blockID, 3);
                 removeBeacon(beaconLocation, blockID);
                 if (registerWithScan(baseScan, pos, world))
-                    System.out.println("UPDATE SUCCESSFUL!");
+                    bwLog("UPDATE SUCCESSFUL!", 2);
             }
         }
         return baseScan;
@@ -326,7 +326,7 @@ public class BeaconWarpManager extends PersistentState {
         }
         channelMap.remove(channelID);
         channelMap.put(channelID, newList);
-        System.out.println("Beacon successfully removed from channelMap");
+        bwLog("Beacon successfully removed from channelMap", 2);
         Map<MinecraftLocation, Integer> blockMapCopy = new HashMap<>();
         for (Map.Entry<MinecraftLocation, Integer> entry : blockMap.entrySet()) {
             if (!(entry.getKey().equals(beaconLocation))) {
@@ -334,7 +334,7 @@ public class BeaconWarpManager extends PersistentState {
             }
         }
         blockMap = blockMapCopy;
-        System.out.println("Beacon successfully removed from blockMap");
+        bwLog("Beacon successfully removed from blockMap", 2);
     }
 
     public void removeBeaconWithLocation(BlockPos pos, World world) {
@@ -348,7 +348,7 @@ public class BeaconWarpManager extends PersistentState {
         //If it HASN'T been updated, then the changes aren't stored in the system, therefore deleting blockMap will remove its only entry.
         //This should be all we need to worry about at all.
         MinecraftLocation beaconLocation = new MinecraftLocation(pos, world.getRegistryKey());
-        System.out.println("Beacon is being broken at " + beaconLocation);
+        bwLog("Beacon is being broken at " + beaconLocation, 2);
         Integer beaconID = 0;
         for (Map.Entry<MinecraftLocation, Integer> entry : blockMap.entrySet()) {
             if (entry.getKey().equals(beaconLocation)) {
@@ -356,7 +356,7 @@ public class BeaconWarpManager extends PersistentState {
             }
         }
         if (beaconID == 0)
-            System.out.println("Oh no");
+            bwLog("Oh no", 1);
         removeBeacon(beaconLocation, beaconID);
     }
 
@@ -368,31 +368,34 @@ public class BeaconWarpManager extends PersistentState {
                 beaconID = entry.getValue();
             }
         }
-        System.out.println("Is " + beaconLocation + " a warp beacon? " + (beaconID != null));
+        bwLog("Is " + beaconLocation + " a warp beacon? " + (beaconID != null), 2);
         if (beaconID != null)
-            System.out.println("And the blockMap value is " + beaconID);
+            bwLog("And the blockMap value is " + beaconID, 2);
         return beaconID != null;
     }
 
     public int countBeaconScore(List<Block> baseBlockList){
-        System.out.println("Counting beacon base score");
+        bwLog("Counting beacon base score", 3);
         BeaconWarpConfig config = BeaconWarpConfig.getInstance();
         int score = 0;
 
-        for (Block baseBlock: baseBlockList) {
+        bwLog("Starting list", 3);
+        for (int i = 0; i < baseBlockList.size(); i++) {
+            Block baseBlock = baseBlockList.get(i);
             String tString = baseBlock.getTranslationKey();
             switch (tString) {
-                case "minecraft:iron_block" -> score += config.Cooldown.scoreIron;
-                case "minecraft:gold_block" -> score += config.Cooldown.scoreGold;
-                case "minecraft:emerald_block" -> score += config.Cooldown.scoreEmerald;
-                case "minecraft:diamond_block" -> score += config.Cooldown.scoreDiamond;
-                case "minecraft:netherite_block" -> score += config.Cooldown.scoreNetherite;
+                case "block.minecraft.iron_block" -> score += config.Cooldown.scoreIron;
+                case "block.minecraft.gold_block" -> score += config.Cooldown.scoreGold;
+                case "block.minecraft.emerald_block" -> score += config.Cooldown.scoreEmerald;
+                case "block.minecraft.diamond_block" -> score += config.Cooldown.scoreDiamond;
+                case "block.minecraft.netherite_block" -> score += config.Cooldown.scoreNetherite;
             }
         }
         return score;
     }
 
     public int getCooldownTicks(float beaconScore){
+        bwLog("Getting cooldown ticks", 3);
         //This math may not make sense at first, go to https://www.desmos.com/calculator/e3clqlhekj for the full derivation.
         //I could do this in one line but let's make this somewhat readable.
         BeaconWarpConfig config = BeaconWarpConfig.getInstance();
@@ -407,9 +410,11 @@ public class BeaconWarpManager extends PersistentState {
         temp = 1 - temp;
         double score = maxCooldown / minCooldown;
         score = Math.pow(score, temp);
+        bwLog("cooldown ticks: " + (score * minCooldown), 3);
         return (int) Math.round(score * minCooldown);
     }
 
+/*
     public boolean scoreValidWarp (int score){
         System.out.println("Score: " + score);
         BeaconWarpConfig config = BeaconWarpConfig.getInstance();
@@ -429,11 +434,12 @@ public class BeaconWarpManager extends PersistentState {
             System.out.println("This is NOT valid for teleportation");
         return (score >= config.minInterdimensionalScore);
     }
+*/
 
     public static List<List<Block>> parseBase(List<Block> blockList) {
         int size = blockList.size();
         if ((size != 9) && (size != 34) && (size != 83) && (size != 164)) {
-            System.out.println("UNCAUGHT ERROR! Beacon base has invalid length in parseBase!");
+            bwLog("UNCAUGHT ERROR! Beacon base has invalid length in parseBase!", 1);
         }
         List<List<Block>> outList = new ArrayList<>();
         int beaconLevelLimit = 4;
@@ -459,7 +465,7 @@ public class BeaconWarpManager extends PersistentState {
                 if (j != width - 1)
                     outString.append(", ");
             }
-            System.out.println(outString);
+            bwLog(outString.toString(), 2);
         }
     }
 
@@ -470,49 +476,54 @@ public class BeaconWarpManager extends PersistentState {
     }
 
     public static void printBlockPos(MinecraftLocation location) {
-        System.out.println(location.toString());
+        bwLog(location.toString(), 2);
     }
 
     public static void printFullMap() {
-        System.out.println("A full map print has been called.");
-        System.out.println(" ");
-        System.out.println(" ");
-        for (Map.Entry<List<Block>, Integer> entry : beaconMap.entrySet()) {
-            System.out.println("---------------------------------------");
-            printBase(parseBase(entry.getKey()));
-            System.out.println("CORRESPONDS TO: " + entry.getValue());
-        }
-        System.out.println("---------------------------------------");
-        System.out.println(" ");
-        System.out.println(" ");
-        System.out.println("Now for the channel map");
-        System.out.println(" ");
-        System.out.println(" ");
-        for (Map.Entry<Integer, List<MinecraftLocation>> entry : channelMap.entrySet()) {
-            System.out.println("---------------------------------------");
-            System.out.println("Channel " + entry.getKey() + " corresponds to:");
-            for (MinecraftLocation location : entry.getValue()) {
-                printBlockPos(location);
+        BeaconWarpConfig config = BeaconWarpConfig.getInstance();
+        if (config.loggingType >= 2) {
+            System.out.println("BW - A full map print has been called.");
+            System.out.println(" ");
+            System.out.println(" ");
+            for (Map.Entry<List<Block>, Integer> entry : beaconMap.entrySet()) {
+                System.out.println("---------------------------------------");
+                printBase(parseBase(entry.getKey()));
+                System.out.println("CORRESPONDS TO: " + entry.getValue());
             }
+            System.out.println("---------------------------------------");
+            System.out.println(" ");
+            System.out.println(" ");
+            System.out.println("Now for the channel map");
+            System.out.println(" ");
+            System.out.println(" ");
+            for (Map.Entry<Integer, List<MinecraftLocation>> entry : channelMap.entrySet()) {
+                System.out.println("---------------------------------------");
+                System.out.println("Channel " + entry.getKey() + " corresponds to:");
+                for (MinecraftLocation location : entry.getValue()) {
+                    printBlockPos(location);
+                }
+            }
+            System.out.println("---------------------------------------");
+            System.out.println(" ");
+            System.out.println(" ");
+            System.out.println("Now for the block map");
+            System.out.println(" ");
+            System.out.println(" ");
+            for (Map.Entry<MinecraftLocation, Integer> entry : blockMap.entrySet()) {
+                System.out.println("MinecraftLocation " + entry.getKey() + " corresponds to " + entry.getValue());
+            }
+            System.out.println("---------------------------------------");
+            System.out.println(" ");
+            System.out.println(" ");
+            System.out.println("Full print concluded.");
+        } else {
+            System.out.println("BW - Map print was called");
         }
-        System.out.println("---------------------------------------");
-        System.out.println(" ");
-        System.out.println(" ");
-        System.out.println("Now for the block map");
-        System.out.println(" ");
-        System.out.println(" ");
-        for (Map.Entry<MinecraftLocation, Integer> entry : blockMap.entrySet()) {
-            System.out.println("MinecraftLocation " + entry.getKey() + " corresponds to " + entry.getValue());
-        }
-        System.out.println("---------------------------------------");
-        System.out.println(" ");
-        System.out.println(" ");
-        System.out.println("Full print concluded.");
     }
 
     public static BeaconWarpManager fromNbt(NbtCompound tag) {
         //Big thanks to Unascribed and other members of their discord guild for help regarding PersistentState and NBT
-        System.out.println("==readNbt called==");
+        bwLog("==readNbt called==", 2);
         printFullMap();
         BeaconWarpManager newManager = new BeaconWarpManager();
 
@@ -521,61 +532,61 @@ public class BeaconWarpManager extends PersistentState {
 
         //beaconMap
         NbtList bMap = (NbtList) tag.get("Beaconwarp:BeaconMap");
-        System.out.println("beaconMap==========================");
-        System.out.println(bMap);
+        bwLog("beaconMap==========================", 3);
+        bwLog(bMap.toString(), 3);
         for (net.minecraft.nbt.NbtElement nbtElement : bMap) {
-            System.out.println("new one");
+            bwLog("new one", 4);
             NbtCompound thisEntry = (NbtCompound) nbtElement;
             NbtList thisList = (NbtList) thisEntry.get("bMapEntryListBlock");
             List<Block> newBlockList = new ArrayList<>();
-            System.out.println("blucks:");
+            bwLog("blucks:", 4);
             for (int j = 0; j < thisList.size(); j++) {
                 Identifier blockId = new Identifier(thisList.getString(j));
                 newBlockList.add(Registry.BLOCK.get(blockId));
-                System.out.println(Registry.BLOCK.get(blockId));
+                bwLog(Registry.BLOCK.get(blockId).toString(), 4);
             }
             beaconMap.put(newBlockList, thisEntry.getInt("bMapEntryInteger"));
-            System.out.println("int:" + thisEntry.getInt("bMapEntryInteger"));
+            bwLog("int:" + thisEntry.getInt("bMapEntryInteger"), 4);
         }
 
         //channelMap
         NbtList cMap = (NbtList) tag.get("Beaconwarp:ChannelMap");
-        System.out.println("channelMap==========================");
-        System.out.println(cMap);
+        bwLog("channelMap==========================", 3);
+        bwLog(cMap.toString(), 3);
         for (net.minecraft.nbt.NbtElement thisElement : cMap) {
-            System.out.println("new one");
+            bwLog("new one", 4);
             NbtCompound thisEntry = (NbtCompound) thisElement;
             NbtList thisList = (NbtList) thisEntry.get("cMapEntryListMinecraftLocation");
             List<MinecraftLocation> newLocationList = new ArrayList<>();
-            System.out.println("locs:");
+            bwLog("locs:", 4);
             for (net.minecraft.nbt.NbtElement nbtElement : thisList) {
                 newLocationList.add(MinecraftLocation.fromNbt((NbtCompound) nbtElement));
-                System.out.println(MinecraftLocation.fromNbt((NbtCompound) nbtElement));
+                bwLog(MinecraftLocation.fromNbt((NbtCompound) nbtElement).toString(), 4);
             }
             channelMap.put(thisEntry.getInt("cMapEntryId"), newLocationList);
-            System.out.println("int:" + thisEntry.getInt("cMapEntryId"));
+            bwLog("int:" + thisEntry.getInt("cMapEntryId"), 4);
         }
 
         //blockMap
         NbtList blMap = (NbtList) tag.get("Beaconwarp:BlockMap");
-        System.out.println("blockMap==========================");
-        System.out.println(blMap);
+        bwLog("blockMap==========================", 3);
+        bwLog(blMap.toString(), 3);
         for (net.minecraft.nbt.NbtElement nbtElement : blMap) {
-            System.out.println("new one");
+            bwLog("new one", 4);
             NbtCompound thisEntry = (NbtCompound) nbtElement;
             NbtCompound locationAsCompound = thisEntry.getCompound("blMapEntryListMinecraftLocation");
             MinecraftLocation thisLocation = MinecraftLocation.fromNbt(locationAsCompound);
-            System.out.println(thisLocation.toString() + thisEntry.getInt("blMapEntryId"));
+            bwLog(thisLocation.toString() + thisEntry.getInt("blMapEntryId"), 4);
             blockMap.put(thisLocation, thisEntry.getInt("blMapEntryId"));
         }
-        System.out.println("==about to return==");
+        bwLog("==about to return==", 3);
         printFullMap();
         return newManager;
     }
 
     @Override
     public NbtCompound writeNbt(NbtCompound tag) {
-        System.out.println("==writeNbt called==");
+        bwLog("==writeNbt called==", 2);
         //nextID
         tag.put("Beaconwarp:NextId", NbtInt.of(nextID));
 
@@ -591,7 +602,7 @@ public class BeaconWarpManager extends PersistentState {
             bMapList.add(entryTag);
         }
         tag.put("Beaconwarp:BeaconMap", bMapList);
-        System.out.println(bMapList);
+        bwLog(bMapList.toString(), 3);
 
         //channelMap
         NbtList cMapList = new NbtList();
@@ -605,7 +616,7 @@ public class BeaconWarpManager extends PersistentState {
             cMapList.add(entryTag);
         }
         tag.put("Beaconwarp:ChannelMap", cMapList);
-        System.out.println(cMapList);
+        bwLog(cMapList.toString(), 3);
 
         //blockMap
         NbtList blMapList = new NbtList();
@@ -616,14 +627,14 @@ public class BeaconWarpManager extends PersistentState {
             blMapList.add(entryTag);
         }
         tag.put("Beaconwarp:BlockMap", blMapList);
-        System.out.println(blMapList);
+        bwLog(blMapList.toString(), 3);
         printFullMap();
-        System.out.println("==writeNbt over==");
+        bwLog("==writeNbt over==", 2);
         return tag;
     }
 
     public static BeaconWarpManager clearedData(NbtCompound tag) {
-        System.out.println("==clearedData called==");
+        bwLog("==clearedData called==", 2);
         BeaconWarpManager manager = new BeaconWarpManager();
         nextID = 1;
         beaconMap.clear();
@@ -633,18 +644,32 @@ public class BeaconWarpManager extends PersistentState {
     }
 
     public BeaconWarpManager() {
-        System.out.println("==BeaconWarpManager constructor called==");
+        bwLog("==BeaconWarpManager constructor called==", 2);
     }
 
     public static BeaconWarpManager get(ServerWorld world) {
-        System.out.println("==get called==");
-        boolean clearing = true;
-        if (clearing) {
-            System.out.println("All beaconMap data will now be cleared.");
+        bwLog("==get called==", 2);
+        BeaconWarpConfig config = BeaconWarpConfig.getInstance();
+        if (config.RESET_ALL_INFO) {
+            bwLog("All beaconMap data will now be cleared.", 1);
             return world.getServer().getOverworld().getPersistentStateManager().getOrCreate(BeaconWarpManager::clearedData, BeaconWarpManager::new, "beaconwarp_manager");
         } else {
-            System.out.println("Will not clear data");
+            bwLog("Will not clear data", 3);
         }
         return world.getServer().getOverworld().getPersistentStateManager().getOrCreate(BeaconWarpManager::fromNbt, BeaconWarpManager::new, "beaconwarp_manager");
+    }
+
+    public static void bwLog(String stringIn, int priority){
+        //Priority types:
+        //1: Very basic information to know the things necessary for functionality
+        //2: Extra info about what functions are being called
+        //3: Debug, which parts of functions are being called and what decisions are being made.
+        //4: Extremely repetitive information about every part of the write and read functions... Shouldn't really be used like, ever.
+
+        //This is an extremely dirty and bad method of logging but I can't be bothered to introduce a proper system yet.
+        //At some point in the future this should all be ripped out and thrown into the fires of hell.
+        BeaconWarpConfig config = BeaconWarpConfig.getInstance();
+        if (priority <= config.loggingType)
+            System.out.println("BW - "  + stringIn);
     }
 }

@@ -34,6 +34,8 @@ public abstract class ServerPlayerMixin extends LivingEntity {
     void onTick(CallbackInfo ci) {      //Run this code every tick
         if (beaconwarpCooldown != 0)
             beaconwarpCooldown--;
+        else
+            sendSystemMessage(Text.of("Cooldown is up!"), getUuid()); //Replace this in the future with some particles?
         BlockPos posBelowPlayer = getBlockPos().down();
         if(lastPos != posBelowPlayer) {
             lastPos = posBelowPlayer;
@@ -74,25 +76,30 @@ public abstract class ServerPlayerMixin extends LivingEntity {
                         if (nextTeleportLocation.getKeyString().equals(worldKey.toString())){
                             if (beaconScore >= config.minTeleportScore) {
                                 scoreCanWarp = true;
+                            } else {
+                                sendSystemMessage(Text.of("Sorry, this beacon isn't powerful enough! Its score is only " + beaconScore + "/" + config.minTeleportScore), getUuid());
                             }
                         } else if (beaconScore >= config.minInterdimensionalScore){
                             scoreCanWarp = true;
+                        } else {
+                            sendSystemMessage(Text.of("Sorry, this beacon isn't powerful enough! Its score is only " + beaconScore + "/" + config.minInterdimensionalScore), getUuid());
                         }
 
                         if (scoreCanWarp) {
                             cooldown = manager.getCooldownTicks(beaconScore);
                             sendSystemMessage(Text.of("Teleporting player from " + worldLocation + " to " + teleportLocation), getUuid());
-                            System.out.println("Teleporting player from " + worldLocation + " to " + teleportLocation);
+                            BeaconWarpManager.bwLog("Teleporting player from " + worldLocation + " to " + teleportLocation, 3);
                             double x = teleportLocation.getPos().getX() - worldLocation.getPos().getX();
                             double y = teleportLocation.getPos().getY() - worldLocation.getPos().getY();
                             double z = teleportLocation.getPos().getZ() - worldLocation.getPos().getZ();
                             ServerPlayerEntity player = (ServerPlayerEntity) (Object) this; //this is so cursed. i hate it.
                             player.teleport(teleportWorld, getX() + x, getY() + y, getZ() + z, this.getYaw(), this.getPitch());
+                            BeaconWarpManager.bwLog("Cooldown applied:" + cooldown, 3);
                             beaconwarpCooldown = cooldown;
                         }
                     }
                 } else {
-                    if ((beaconwarpCooldown % 5) == 0)
+                    if ((beaconwarpCooldown % 20) == 0)
                         sendSystemMessage(Text.of("Sorry, you still have a cooldown for another " + beaconwarpCooldown + " ticks!"), getUuid());
                 }
             }

@@ -46,7 +46,7 @@ public class BeaconWarpConfig implements ConfigData {
         public int scoreDiamond = 20;
 
         @ConfigEntry.Gui.Tooltip()
-        public int scoreNetherite = 20;
+        public int scoreNetherite = 80;
 
         @ConfigEntry.Gui.Tooltip()
         public int cooldownMinTicks = 100;
@@ -87,10 +87,14 @@ public class BeaconWarpConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip()
     public String soundActivate = SoundEvents.BLOCK_BEACON_POWER_SELECT.getId().toString();
 
-    @ConfigEntry.Gui.Excluded //Unimplemented for now
-    @ConfigEntry.Category(value = "logging")
+    //@ConfigEntry.Gui.Excluded //Unimplemented for now
+    @ConfigEntry.Category(value = "misc")
     @ConfigEntry.Gui.Tooltip()
-    public boolean doAllLogging = true;
+    public int loggingType = 1;
+
+    @ConfigEntry.Category(value = "misc")
+    @ConfigEntry.Gui.Tooltip()
+    public boolean RESET_ALL_INFO = false;
 
     public static void init() {
         AutoConfig.register(BeaconWarpConfig.class, GsonConfigSerializer::new);
