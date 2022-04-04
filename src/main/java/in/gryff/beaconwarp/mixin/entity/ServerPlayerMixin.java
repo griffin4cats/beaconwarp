@@ -34,8 +34,8 @@ public abstract class ServerPlayerMixin extends LivingEntity {
     void onTick(CallbackInfo ci) {      //Run this code every tick
         if (beaconwarpCooldown != 0)
             beaconwarpCooldown--;
-        else
-            sendSystemMessage(Text.of("Cooldown is up!"), getUuid()); //Replace this in the future with some particles?
+        if (beaconwarpCooldown == 1)
+                sendSystemMessage(Text.of("Cooldown is up!"), getUuid()); //Replace this in the future with some particles?
         BlockPos posBelowPlayer = getBlockPos().down();
         if(lastPos != posBelowPlayer) {
             lastPos = posBelowPlayer;
@@ -73,16 +73,16 @@ public abstract class ServerPlayerMixin extends LivingEntity {
                         //Now that we know the location we're warping to, we need to check if it's in the same world or not.
                         int beaconScore = manager.countBeaconScore(baseScan);
                         boolean scoreCanWarp = false;
-                        if (nextTeleportLocation.getKeyString().equals(worldKey.toString())){
+                        if (nextTeleportLocation.getKeyString().equals(worldLocation.getKeyString())){
                             if (beaconScore >= config.minTeleportScore) {
                                 scoreCanWarp = true;
                             } else {
-                                sendSystemMessage(Text.of("Sorry, this beacon isn't powerful enough! Its score is only " + beaconScore + "/" + config.minTeleportScore), getUuid());
+                                sendSystemMessage(Text.of("Sorry, this beacon isn't powerful enough for same-dimension teleport! Its score is only " + beaconScore + "/" + config.minTeleportScore), getUuid());
                             }
                         } else if (beaconScore >= config.minInterdimensionalScore){
                             scoreCanWarp = true;
                         } else {
-                            sendSystemMessage(Text.of("Sorry, this beacon isn't powerful enough! Its score is only " + beaconScore + "/" + config.minInterdimensionalScore), getUuid());
+                            sendSystemMessage(Text.of("Sorry, this beacon isn't powerful enough for interdimensional teleport! Its score is only " + beaconScore + "/" + config.minInterdimensionalScore), getUuid());
                         }
 
                         if (scoreCanWarp) {
